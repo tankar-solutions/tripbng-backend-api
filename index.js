@@ -55,7 +55,7 @@ connectDb();
 // Root route
 app.get('/', async (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
-	res.send({ msg: 'This has enabled CORS Hello' });
+	res.send({ msg: 'This has enabled CORS' });
 });
 
 // Start server
