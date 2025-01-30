@@ -12,7 +12,7 @@ const createAdmin = async (req, res) => {
         req.body.password = hashPassword(req.body.password);
 		const data = await Admin.create(req.body);
 
-		return res.status(201).json(successMessage('Admin Created Successfullyssss', data));
+		return res.status(201).json(successMessage('Admin Created Successfully', data));
 	} catch (err) {
 		console.log(err)
 		return res
