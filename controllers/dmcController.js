@@ -5,7 +5,7 @@ import DMC from '../models/DMC.js';
 import Package from '../models/Package.js';
 import nodemailer from 'nodemailer';
 import { errorMessage, successMessage } from '../middlewares/util.js';
-import EmailVerification from '../models/EmailVerification.js';
+import {EmailVerification} from '../models/EmailVerification.js';
 
 const loginDMC = async (req, res) => {
 	try {
