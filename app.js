@@ -8,7 +8,7 @@ import flightRouter from './routes/flight.js';
 import UserRouter from './routes/user.js';
 import DMCRouter from './routes/dmc.js';
 import AdminRouter from './routes/admin.routes.js';
-import BestRouter from "./routes/bestFlight.routes.js"
+// import BestRouter from "./routes/bestFlight.routes.js"
 
 
 const app = express();
@@ -28,6 +28,6 @@ app.use('/flight', flightRouter);
 app.use('/user', UserRouter);
 app.use('/dmc', DMCRouter);
 app.use('/admin', AdminRouter);
-app.use('/best', BestRouter);
+// app.use('/best', BestRouter);
 
 export {app}
