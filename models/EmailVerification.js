@@ -14,4 +14,4 @@ const emailVerificationSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
-export default mongoose.model('EmailVerification', emailVerificationSchema);
+export const EmailVerification =  mongoose.model('EmailVerification', emailVerificationSchema);
