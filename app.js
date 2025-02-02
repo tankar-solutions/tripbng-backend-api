@@ -24,6 +24,10 @@ app.use(bodyParser.json({ limit: '200mb' }));
 app.use(cookieParser())
 
 // Routes
+app.get('/',(req,res)=>
+{
+	res.send("hellow")
+})
 app.use('/flight', flightRouter);
 app.use('/user', UserRouter);
 app.use('/dmc', DMCRouter);
