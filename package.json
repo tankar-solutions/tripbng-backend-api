@@ -5,14 +5,15 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "jest --passWithNoTests",
 		"start": "node index.js",
 		"dev": "nodemon index.js"
 	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.740.0",
+		"@aws-sdk/client-s3": "^3.731.1",
+		"@aws-sdk/s3-request-presigner": "^3.740.0",
 		"axios": "^1.7.9",
 		"bcrypt": "^5.1.1",
 		"bcryptjs": "^2.4.3",
@@ -29,5 +30,8 @@
 		"multer": "^1.4.5-lts.1",
 		"nodemailer": "^6.10.0",
 		"payu-sdk-node-index-fixed": "^1.1.1"
+	},
+	"devDependencies": {
+		"jest": "^29.7.0"
 	}
 }
