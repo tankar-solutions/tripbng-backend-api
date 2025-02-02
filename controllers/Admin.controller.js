@@ -7,7 +7,7 @@ import { isNull } from "../utils/FormCheck.js";
 import { generateOTP } from "../utils/generateOtp.js"
 import { sendOTP } from "../utils/sendMail.js"
 import { EmailVerification } from "../models/EmailVerification.js";
-
+import Users from "../models/Users.js";
 const options = {
     httpOnly: true,
     secure: true
@@ -286,6 +286,24 @@ const ChangeForgetPassword = AsnycHandler(async (req, res) => {
 
 })
 
+
+//Dashboard controller
+
+
+const GetAllUser = AsnycHandler(async(req,res)=>{
+
+    const AllUsers =  await Users.find({})
+    res.status(200)
+    .json(
+        new ApiResponse(200,{success:true , data:AllUsers} ,"Fetched All User")
+    )
+
+})
+
+
+
+
+
 export {
     CreateSuperAdmin,
     LoginAdmin,
@@ -294,5 +312,6 @@ export {
     AdminLogout,
     veryfyOTPLogin,
     ForgetPassword,
-    ChangeForgetPassword
+    ChangeForgetPassword,
+    GetAllUser
 }

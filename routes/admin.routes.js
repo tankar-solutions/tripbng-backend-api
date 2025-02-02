@@ -7,7 +7,8 @@ import  {
     AdminLogout,
     ChangeForgetPassword,
     ForgetPassword,
-    veryfyOTPLogin
+    veryfyOTPLogin,
+    GetAllUser
 } from '../controllers/Admin.controller.js'; 
 import {AdminVerify} from "../middlewares/AdminVrfy.js"
 
@@ -20,5 +21,6 @@ router.route('/createSubAdmin').post(AdminVerify , CreateSubAdmin)
 router.route('/changePass').post(AdminVerify , ChangePassword)
 router.route('/forgetPass').post(AdminVerify ,ForgetPassword)
 router.route('/ChangeForgetPass').post(AdminVerify ,ChangeForgetPassword)
+router.route('/getalluser').get(GetAllUser)
 router.route('/logout').post(AdminVerify , AdminLogout)
 export default router;
