@@ -23,4 +23,5 @@ router.route('/forgetPass').post(AdminVerify ,ForgetPassword)
 router.route('/ChangeForgetPass').post(AdminVerify ,ChangeForgetPassword)
 router.route('/getalluser').get(GetAllUser)
 router.route('/logout').post(AdminVerify , AdminLogout)
+
 export default router;
