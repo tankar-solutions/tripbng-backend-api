@@ -26,7 +26,7 @@ app.use(cookieParser())
 // Routes
 app.get('/',(req,res)=>
 {
-	res.send("hellow")
+	res.send("hellowq")
 })
 app.use('/flight', flightRouter);
 app.use('/user', UserRouter);
