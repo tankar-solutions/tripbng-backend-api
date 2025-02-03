@@ -11,93 +11,89 @@ import AirlineCodes from '../models/AirlineCodes.js';
 
 const searchAirport = async (req, res) => {
 	try {
-	  var data = [];
-	  const searchTerm = req.query.search;
-  
-	  // If no search term is provided, return all airports (no limit)
-	  if (!searchTerm || searchTerm === '') {
-		// Fetch all airports, limit to avoid overload
-		data = [
-		  ...(await AirportCodes.find({}).limit(50)), // Limit to a reasonable number (e.g., 50 airports)
-		];
-	  } else {
-		// Search for IATA codes without limit
-		let iataResults = await AirportCodes.find({
-		  iata_code: { $regex: searchTerm, $options: 'i' },
+		var data = [];
+		var defaultData = await AirportCodes.find({
+			iata_code: { $in: ['DEL', 'AMD'] },
 		});
-  
+
+		const searchTerm = req.query.search;
+
+		let iataResults = await AirportCodes.find({
+			iata_code: { $regex: searchTerm, $options: 'i' },
+		}).limit(15);
+
 		let remainingLimit = 15 - iataResults.length;
-  
-		// Search for municipalities if there are remaining results
+
 		let municipalityResults = [];
 		if (remainingLimit > 0) {
-		  municipalityResults = await AirportCodes.find({
-			municipality: { $regex: searchTerm, $options: 'i' },
-			iata_code: { $nin: iataResults.map((res) => res.iata_code) },
-		  }).limit(remainingLimit);
+			municipalityResults = await AirportCodes.find({
+				municipality: { $regex: searchTerm, $options: 'i' },
+				iata_code: { $nin: iataResults.map((res) => res.iata_code) },
+			}).limit(remainingLimit);
 		}
-  
+
 		remainingLimit -= municipalityResults.length;
-  
-		// Search for names if there are remaining results
+
 		let nameResults = [];
 		if (remainingLimit > 0) {
-		  nameResults = await AirportCodes.find({
-			name: { $regex: searchTerm, $options: 'i' },
-			iata_code: { $nin: iataResults.map((res) => res.iata_code) },
-			municipality: {
-			  $nin: municipalityResults.map((res) => res.municipality),
-			},
-		  }).limit(remainingLimit);
+			nameResults = await AirportCodes.find({
+				name: { $regex: searchTerm, $options: 'i' },
+				iata_code: { $nin: iataResults.map((res) => res.iata_code) },
+				municipality: {
+					$nin: municipalityResults.map((res) => res.municipality),
+				},
+			}).limit(remainingLimit);
 		}
-  
-		data = [...iataResults, ...municipalityResults, ...nameResults];
-	  }
-  
-	  // Add nearby airports calculation, limit the number of nearby results to 5 per airport to prevent overload
-	  if (data.length > 0) {
-		data = await Promise.all(
-		  data.map(async (airport) => {
-			const [longitude, latitude] = airport.coordinates.coordinates;
-  
-			// Find nearby airports within 200 km radius (limit to 5 results for performance)
-			const nearbyAirports = await AirportCodes.aggregate([
-			  {
-				$geoNear: {
-				  near: { type: 'Point', coordinates: [longitude, latitude] },
-				  distanceField: 'distance',
-				  spherical: true,
-				  maxDistance: 200 * 1000, // 200 km in meters
-				  distanceMultiplier: 1 / 1000, // Convert distance to kilometers
-				},
-			  },
-			  {
-				$match: {
-				  _id: { $ne: airport._id }, // Exclude the current airport
-				},
-			  },
-			  {
-				$limit: 5, // Limit the nearby airports to 5 to improve performance
-			  },
-			]);
-  
-			return {
-			  ...airport._doc,
-			  nearbyAirports: nearbyAirports,
-			};
-		  })
-		);
-	  }
-  
-	  return res.status(200).json(successMessage('Fetched Successfully', data));
+
+		if (req.query.search === '') {
+			data = [
+				...defaultData,
+				...iataResults,
+				...municipalityResults,
+				...nameResults,
+			];
+		} else {
+			data = [...iataResults, ...municipalityResults, ...nameResults];
+		}
+
+		if (data.length > 0) {
+			data = await Promise.all(
+				data.map(async (airport) => {
+					const [longitude, latitude] = airport.coordinates.coordinates;
+
+					// Find nearby airports within 200 km radius
+					const nearbyAirports = await AirportCodes.aggregate([
+						{
+							$geoNear: {
+								near: { type: 'Point', coordinates: [longitude, latitude] },
+								distanceField: 'distance', // Distance will be calculated in meters
+								spherical: true,
+								maxDistance: 200 * 1000, // 200 km in meters
+								distanceMultiplier: 1 / 1000, // Convert distance to kilometers
+							},
+						},
+						{
+							$match: {
+								_id: { $ne: airport._id },
+							},
+						},
+					]);
+
+					return {
+						...airport._doc,
+						nearbyAirports: nearbyAirports,
+					};
+				})
+			);
+		}
+
+		return res.status(200).json(successMessage('Fetched Successfully', data));
 	} catch (err) {
-	  return res
-		.status(500)
-		.json(errorMessage(err?.message || 'Something went wrong'));
+		return res
+			.status(500)
+			.json(errorMessage(err?.message || 'Something went wrong'));
 	}
-  };
-  
-  
+};
 
 const sortFlights = (flights, sortOption) => {
 	const durationToMinutes = (duration) => {
