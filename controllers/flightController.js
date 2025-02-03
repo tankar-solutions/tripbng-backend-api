@@ -12,57 +12,60 @@ import AirlineCodes from '../models/AirlineCodes.js';
 const searchAirport = async (req, res) => {
 	try {
 	  var data = [];
-	  var defaultData = await AirportCodes.find({
-		iata_code: { $in: ['DEL', 'AMD'] },
-	  });
-  
 	  const searchTerm = req.query.search;
   
-	  let iataResults = await AirportCodes.find({
-		iata_code: { $regex: searchTerm, $options: 'i' },
-	  });
-  
-	  let municipalityResults = [];
-	  if (iataResults.length < 15) {
-		municipalityResults = await AirportCodes.find({
-		  municipality: { $regex: searchTerm, $options: 'i' },
-		  iata_code: { $nin: iataResults.map((res) => res.iata_code) },
-		});
-	  }
-  
-	  let nameResults = [];
-	  if (iataResults.length + municipalityResults.length < 15) {
-		nameResults = await AirportCodes.find({
-		  name: { $regex: searchTerm, $options: 'i' },
-		  iata_code: { $nin: iataResults.map((res) => res.iata_code) },
-		  municipality: {
-			$nin: municipalityResults.map((res) => res.municipality),
-		  },
-		});
-	  }
-  
-	  if (req.query.search === '') {
+	  // If no search term is provided, return all airports (no limit)
+	  if (!searchTerm || searchTerm === '') {
+		// Fetch all airports, limit to avoid overload
 		data = [
-		  ...defaultData,
-		  ...iataResults,
-		  ...municipalityResults,
-		  ...nameResults,
+		  ...(await AirportCodes.find({}).limit(50)), // Limit to a reasonable number (e.g., 50 airports)
 		];
 	  } else {
+		// Search for IATA codes without limit
+		let iataResults = await AirportCodes.find({
+		  iata_code: { $regex: searchTerm, $options: 'i' },
+		});
+  
+		let remainingLimit = 15 - iataResults.length;
+  
+		// Search for municipalities if there are remaining results
+		let municipalityResults = [];
+		if (remainingLimit > 0) {
+		  municipalityResults = await AirportCodes.find({
+			municipality: { $regex: searchTerm, $options: 'i' },
+			iata_code: { $nin: iataResults.map((res) => res.iata_code) },
+		  }).limit(remainingLimit);
+		}
+  
+		remainingLimit -= municipalityResults.length;
+  
+		// Search for names if there are remaining results
+		let nameResults = [];
+		if (remainingLimit > 0) {
+		  nameResults = await AirportCodes.find({
+			name: { $regex: searchTerm, $options: 'i' },
+			iata_code: { $nin: iataResults.map((res) => res.iata_code) },
+			municipality: {
+			  $nin: municipalityResults.map((res) => res.municipality),
+			},
+		  }).limit(remainingLimit);
+		}
+  
 		data = [...iataResults, ...municipalityResults, ...nameResults];
 	  }
   
+	  // Add nearby airports calculation, limit the number of nearby results to 5 per airport to prevent overload
 	  if (data.length > 0) {
 		data = await Promise.all(
 		  data.map(async (airport) => {
 			const [longitude, latitude] = airport.coordinates.coordinates;
   
-			// Find nearby airports within 200 km radius
+			// Find nearby airports within 200 km radius (limit to 5 results for performance)
 			const nearbyAirports = await AirportCodes.aggregate([
 			  {
 				$geoNear: {
 				  near: { type: 'Point', coordinates: [longitude, latitude] },
-				  distanceField: 'distance', // Distance will be calculated in meters
+				  distanceField: 'distance',
 				  spherical: true,
 				  maxDistance: 200 * 1000, // 200 km in meters
 				  distanceMultiplier: 1 / 1000, // Convert distance to kilometers
@@ -70,8 +73,11 @@ const searchAirport = async (req, res) => {
 			  },
 			  {
 				$match: {
-				  _id: { $ne: airport._id },
+				  _id: { $ne: airport._id }, // Exclude the current airport
 				},
+			  },
+			  {
+				$limit: 5, // Limit the nearby airports to 5 to improve performance
 			  },
 			]);
   
@@ -90,6 +96,7 @@ const searchAirport = async (req, res) => {
 		.json(errorMessage(err?.message || 'Something went wrong'));
 	}
   };
+  
   
 
 const sortFlights = (flights, sortOption) => {
