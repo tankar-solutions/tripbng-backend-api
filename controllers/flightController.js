@@ -11,89 +11,86 @@ import AirlineCodes from '../models/AirlineCodes.js';
 
 const searchAirport = async (req, res) => {
 	try {
-		var data = [];
-		var defaultData = await AirportCodes.find({
-			iata_code: { $in: ['DEL', 'AMD'] },
+	  var data = [];
+	  var defaultData = await AirportCodes.find({
+		iata_code: { $in: ['DEL', 'AMD'] },
+	  });
+  
+	  const searchTerm = req.query.search;
+  
+	  let iataResults = await AirportCodes.find({
+		iata_code: { $regex: searchTerm, $options: 'i' },
+	  });
+  
+	  let municipalityResults = [];
+	  if (iataResults.length < 15) {
+		municipalityResults = await AirportCodes.find({
+		  municipality: { $regex: searchTerm, $options: 'i' },
+		  iata_code: { $nin: iataResults.map((res) => res.iata_code) },
 		});
-
-		const searchTerm = req.query.search;
-
-		let iataResults = await AirportCodes.find({
-			iata_code: { $regex: searchTerm, $options: 'i' },
-		}).limit(15);
-
-		let remainingLimit = 15 - iataResults.length;
-
-		let municipalityResults = [];
-		if (remainingLimit > 0) {
-			municipalityResults = await AirportCodes.find({
-				municipality: { $regex: searchTerm, $options: 'i' },
-				iata_code: { $nin: iataResults.map((res) => res.iata_code) },
-			}).limit(remainingLimit);
-		}
-
-		remainingLimit -= municipalityResults.length;
-
-		let nameResults = [];
-		if (remainingLimit > 0) {
-			nameResults = await AirportCodes.find({
-				name: { $regex: searchTerm, $options: 'i' },
-				iata_code: { $nin: iataResults.map((res) => res.iata_code) },
-				municipality: {
-					$nin: municipalityResults.map((res) => res.municipality),
+	  }
+  
+	  let nameResults = [];
+	  if (iataResults.length + municipalityResults.length < 15) {
+		nameResults = await AirportCodes.find({
+		  name: { $regex: searchTerm, $options: 'i' },
+		  iata_code: { $nin: iataResults.map((res) => res.iata_code) },
+		  municipality: {
+			$nin: municipalityResults.map((res) => res.municipality),
+		  },
+		});
+	  }
+  
+	  if (req.query.search === '') {
+		data = [
+		  ...defaultData,
+		  ...iataResults,
+		  ...municipalityResults,
+		  ...nameResults,
+		];
+	  } else {
+		data = [...iataResults, ...municipalityResults, ...nameResults];
+	  }
+  
+	  if (data.length > 0) {
+		data = await Promise.all(
+		  data.map(async (airport) => {
+			const [longitude, latitude] = airport.coordinates.coordinates;
+  
+			// Find nearby airports within 200 km radius
+			const nearbyAirports = await AirportCodes.aggregate([
+			  {
+				$geoNear: {
+				  near: { type: 'Point', coordinates: [longitude, latitude] },
+				  distanceField: 'distance', // Distance will be calculated in meters
+				  spherical: true,
+				  maxDistance: 200 * 1000, // 200 km in meters
+				  distanceMultiplier: 1 / 1000, // Convert distance to kilometers
 				},
-			}).limit(remainingLimit);
-		}
-
-		if (req.query.search === '') {
-			data = [
-				...defaultData,
-				...iataResults,
-				...municipalityResults,
-				...nameResults,
-			];
-		} else {
-			data = [...iataResults, ...municipalityResults, ...nameResults];
-		}
-
-		if (data.length > 0) {
-			data = await Promise.all(
-				data.map(async (airport) => {
-					const [longitude, latitude] = airport.coordinates.coordinates;
-
-					// Find nearby airports within 200 km radius
-					const nearbyAirports = await AirportCodes.aggregate([
-						{
-							$geoNear: {
-								near: { type: 'Point', coordinates: [longitude, latitude] },
-								distanceField: 'distance', // Distance will be calculated in meters
-								spherical: true,
-								maxDistance: 200 * 1000, // 200 km in meters
-								distanceMultiplier: 1 / 1000, // Convert distance to kilometers
-							},
-						},
-						{
-							$match: {
-								_id: { $ne: airport._id },
-							},
-						},
-					]);
-
-					return {
-						...airport._doc,
-						nearbyAirports: nearbyAirports,
-					};
-				})
-			);
-		}
-
-		return res.status(200).json(successMessage('Fetched Successfully', data));
+			  },
+			  {
+				$match: {
+				  _id: { $ne: airport._id },
+				},
+			  },
+			]);
+  
+			return {
+			  ...airport._doc,
+			  nearbyAirports: nearbyAirports,
+			};
+		  })
+		);
+	  }
+  
+	  return res.status(200).json(successMessage('Fetched Successfully', data));
 	} catch (err) {
-		return res
-			.status(500)
-			.json(errorMessage(err?.message || 'Something went wrong'));
+	  return res
+		.status(500)
+		.json(errorMessage(err?.message || 'Something went wrong'));
 	}
-};
+  };
+  
 
 const sortFlights = (flights, sortOption) => {
 	const durationToMinutes = (duration) => {
