@@ -5,8 +5,9 @@ import { Admin } from "../models/Admin.js";
 import { SubAdmin } from "../models/SubAdmin.models.js";
 import { isNull } from "../utils/FormCheck.js";
 import { generateOTP } from "../utils/generateOtp.js"
-import { sendOTP } from "../utils/sendMail.js"
+import { sendMail } from "../utils/sendMail.js"
 import { EmailVerification } from "../models/EmailVerification.js";
+import { Agent } from "../models/Agent/Agent.models.js";
 import Users from "../models/Users.js";
 const options = {
     httpOnly: true,
@@ -68,7 +69,7 @@ const LoginAdmin = AsnycHandler(async (req, res) => {
 
 
     const otp = generateOTP();
-    await sendOTP(user.email, otp)
+    await sendMail(user.email,"Validation otp", `your otp is ${otp}`)
 
     await EmailVerification.create({
         email: user.email,
@@ -233,7 +234,7 @@ const AdminLogout = AsnycHandler(async (req, res) => {
 const ForgetPassword = AsnycHandler(async (req, res) => {
     const user = req.user;
     const code = generateOTP();
-    await sendOTP(user.email, code);
+    await sendMail(user.email,"Validation otp", `your otp is ${code}`);
     await EmailVerification.create({
         email:user.email,
         code:code
@@ -300,9 +301,53 @@ const GetAllUser = AsnycHandler(async(req,res)=>{
 
 })
 
+// const GetAllBookedFlights = AsnycHandler(async(req,res)=>{})
 
+const GetAllAgents = AsnycHandler(async(req,res)=>{
 
+    const UnAproveAgents = await Agent.find({aprove:false}) || null
+    const AproveAgents = await Agent.find({aprove:true}) || null
 
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , {success:true , data:{
+            UnAproveAgents,
+            AproveAgents
+        }} , "Data Fetch SuccessFully" )
+    )
+
+    
+})
+
+const GiveAgentAprove = AsnycHandler(async(req,res)=>{
+    const {_id} = req.body;
+
+    if(!_id)
+    {
+        return res.status(400)
+        .json(new ApiResponse(400 , {success:false} , "Id is not Geted"))
+    }
+
+    const AgentUser = await Agent.findById(_id)
+    if(!AgentUser)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false} , "Id is wrong")
+        )
+    }
+
+    AgentUser.aprove = true;
+    await AgentUser.save()
+    const otp = generateOTP();
+    await sendMail(AgentUser.email , "Aprove Success" , "Congrts Admin Aprove Your Request")
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , {success:true} , "Congrts Your Request Aprove From the Admin")
+    )
+    
+})
 
 export {
     CreateSuperAdmin,
@@ -313,5 +358,7 @@ export {
     veryfyOTPLogin,
     ForgetPassword,
     ChangeForgetPassword,
-    GetAllUser
+    GetAllUser,
+    GetAllAgents,
+    GiveAgentAprove
 }

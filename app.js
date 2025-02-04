@@ -8,6 +8,7 @@ import flightRouter from './routes/flight.js';
 import UserRouter from './routes/user.js';
 import DMCRouter from './routes/dmc.js';
 import AdminRouter from './routes/admin.routes.js';
+import AgentRoutes from "./routes/Agent.auth.routes.js"
 // import BestRouter from "./routes/bestFlight.routes.js"
 
 
@@ -33,5 +34,6 @@ app.use('/user', UserRouter);
 app.use('/dmc', DMCRouter);
 app.use('/admin', AdminRouter);
 // app.use('/best', BestRouter);
+app.use('/AgentAuth' , AgentRoutes);
 
 export {app}

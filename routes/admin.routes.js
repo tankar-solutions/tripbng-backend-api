@@ -8,7 +8,8 @@ import  {
     ChangeForgetPassword,
     ForgetPassword,
     veryfyOTPLogin,
-    GetAllUser
+    GetAllUser,
+    GiveAgentAprove
 } from '../controllers/Admin.controller.js'; 
 import {AdminVerify} from "../middlewares/AdminVrfy.js"
 
@@ -23,5 +24,6 @@ router.route('/forgetPass').post(AdminVerify ,ForgetPassword)
 router.route('/ChangeForgetPass').post(AdminVerify ,ChangeForgetPassword)
 router.route('/getalluser').get(GetAllUser)
 router.route('/logout').post(AdminVerify , AdminLogout)
+router.route('/Aprove').post(GiveAgentAprove)
 
 export default router;
