@@ -7,6 +7,12 @@ import { isNull } from "../../utils/FormCheck.js"
 import { Agent } from "../../models/Agent/Agent.models.js"
 import { sendSMS } from "../../utils/SMS.js"
 
+const options = {
+    httpOnly: true,
+    secure: true
+};
+
+
 //This controller Send User To Otp for a email veryfication
 const SendMail = AsnycHandler(async (req, res) => {
     const Mail = req.body;
@@ -104,6 +110,9 @@ const CheckOtp = AsnycHandler(async (req, res) => {
 
 })
 
+//Adhar and pan vrfication leter........
+
+
 const Register = AsnycHandler(async(req ,res)=>{
     const {agentType,agencyName,mobile,email,country,state,city,pincode,address1,address2,address3,adharNumber,gstNumber} = req.body;
 
@@ -148,13 +157,125 @@ const Register = AsnycHandler(async(req ,res)=>{
 
 })
 
-// const Login = AsnycHandler(async(req,res)=>
-// {
+const Login = AsnycHandler(async(req,res)=>
+{
+    const {contactFeild} = req.body;
+    if(contactFeild.includes('@'))
+    {
+        const otp  = generateOTP();
+        await sendMail(contactFeild , "Login Verification mail" , `Your Otp is ${otp}`)
+        const sendEmailObject = await OtpVfy.create({
+            veryficationType:'login',
+            veryficationFeild:contactFeild,
+            otp:otp
 
-// })
+        })
+        if(!sendEmailObject)
+        {
+            return res.status(400)
+            .json(new ApiResponse(400,{success:false} , "Seomthing Went wrong while creating object"))
+        }
+
+        return res.status(200)
+        .json(new ApiResponse(200 , {success:true} , "Otp is send on your contact details"))
+    }
+    else 
+    {
+        const otp = generateOTP();
+        await sendSMS(`Your OTP is ${otp}` , contactFeild)
+        const sendSMSObject = await OtpVfy.create({
+            veryficationType:'login',
+            veryficationFeild:contactFeild,
+            otp:otp
+
+        })
+        if(!sendSMSObject)
+        {
+            return res.status(400)
+            .json(new ApiResponse(400,{success:false} , "Seomthing Went wrong while creating object"))
+        }
+        return res.status(200)
+        .json(new ApiResponse(200 , {success:true} , "Otp is send on your contact details"))
+    }
+})
+
+const LoginVrfy = AsnycHandler(async(req,res)=>
+{
+    const { type, filed, otp } = req.body;
+    if (isNull[type, filed, otp]) {
+        return res.status(400)
+            .json(400, { success: false }, "Please Enter the All Filed ")
+    }
+
+    if(filed.includes('@'))
+    {
+       const isOtpValid = OtpVfy.findOne({
+        veryficationType: type,
+        veryficationFeild: filed,
+        otp: otp
+       })
+
+       if(!isOtpValid)
+       {
+        return res.status(200)
+        .json( new ApiResponse(200 , {success:false} , "Please Enter Valid Otp"))
+       }
+       
+
+        const AgentUser = await Agent.findOne({email:filed})
+
+        const AccessToken =  AgentUser.GenrateAccessTocken()
+        if(AgentUser.aprove == true)
+        {
+            return res.status(200)
+            .cookie("AccessToken" , AccessToken ,options )
+            .json(new ApiResponse(200 ,{success:true} ,"Loggin"))
+
+        }
+        else
+        {
+            return res.status(200)
+            .json(new ApiResponse(200 , {success:true} , "You Can't Login until Admin Aprove Your Request"))
+        }
+
+    }
+    else 
+    {
+        const isOtpValid = OtpVfy.findOne({
+            veryficationType: type,
+            veryficationFeild: filed,
+            otp: otp
+           })
+    
+           if(!isOtpValid)
+           {
+            return res.status(200)
+            .json( new ApiResponse(200 , {success:false} , "Please Enter Valid Otp"))
+           }
+
+
+        
+        const AgentUser = await Agent.findOne({mobile:filed})
+        console.log(AgentUser)
+        const AccessToken =  AgentUser.GenrateAccessTocken()
+        if(AgentUser.aprove == true)
+        {
+            return res.status(200)
+            .cookie("AccessToken" , AccessToken ,options )
+            .json(new ApiResponse(200 ,{success:true} ,"Loggin"))
+        }
+        else
+        {
+            return res.status(200)
+            .json(new ApiResponse(200 , {success:true} , "You Can't Login until Admin Aprove Your Request"))
+        }
+    }
+})
 export {
     SendMail,
     sendSMS,
     CheckOtp,
-    Register
+    Register,
+    Login,
+    LoginVrfy
 }

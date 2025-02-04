@@ -5,7 +5,7 @@ const OtpvrfSchema = mongoose.Schema({
 
    veryficationType:{
     type:String,
-    enum:['phone' , 'email' , 'pan' , 'adhar'],
+    enum:['phone' , 'email' , 'pan' , 'adhar' , 'login'],
     required:true
    },
 

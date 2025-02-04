@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { generateOTP } from "../../utils/generateOtp.js"
 import { sendMail } from "../../utils/sendMail.js"
 import { sendSMS } from "../../utils/SMS.js";
-
+import jwt from "jsonwebtoken"
 const AgentSchema = mongoose.Schema({
 
     agentType:{
@@ -72,6 +72,22 @@ const AgentSchema = mongoose.Schema({
 
 
 },{ timestamps: true })
+
+
+
+AgentSchema.methods.GenrateAccessTocken = function()
+{
+  return jwt.sign(
+    {
+      _id:this._id
+
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn:process.env.JWT_EXPIRE
+    }
+  )
+}
 
 AgentSchema.post("save" ,async function()
 {
