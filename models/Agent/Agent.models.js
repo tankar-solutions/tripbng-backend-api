@@ -3,6 +3,8 @@ import { generateOTP } from "../../utils/generateOtp.js"
 import { sendMail } from "../../utils/sendMail.js"
 import { sendSMS } from "../../utils/SMS.js";
 import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt"
+
 const AgentSchema = mongoose.Schema({
 
     agentType:{
@@ -13,6 +15,10 @@ const AgentSchema = mongoose.Schema({
         type:String,
         required:true,
         uniqe:true
+    },
+    password:{
+        type:String,
+        required:true
     },
     mobile:{
         type:String,
@@ -68,6 +74,10 @@ const AgentSchema = mongoose.Schema({
         type:Boolean,
         default:false,
         
+    },
+    condition:{
+        type:Boolean,
+        default:false
     }
 
 
@@ -87,6 +97,16 @@ AgentSchema.methods.GenrateAccessTocken = function()
       expiresIn:process.env.JWT_EXPIRE
     }
   )
+}
+adminSchema.pre("save" , async function(next){
+  if(!this.isModified("password")){next()}
+  this.password = await bcrypt.hash(this.password , 10);
+  next();
+})
+
+adminSchema.methods.PassCompare = async function(userPassword)
+{
+  return await bcrypt.compare(userPassword , this.password)
 }
 
 AgentSchema.post("save" ,async function()

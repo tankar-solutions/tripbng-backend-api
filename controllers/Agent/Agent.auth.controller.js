@@ -159,7 +159,20 @@ const Register = AsnycHandler(async(req ,res)=>{
 
 const Login = AsnycHandler(async(req,res)=>
 {
-    const {contactFeild} = req.body;
+    const {contactFeild , password} = req.body;
+    const Agentuser = req.user;
+    const AgentFromDataBase = await Agent.findById(Agentuser._id)
+
+    const isPasswordCorrect = AgentFromDataBase.PassCompare(password)
+
+    if(!isPasswordCorrect)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false},"Please Enter the correct Password")
+        )
+    }
+
     if(contactFeild.includes('@'))
     {
         const otp  = generateOTP();
