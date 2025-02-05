@@ -237,6 +237,8 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
         return res.status(200)
         .json( new ApiResponse(200 , {success:false} , "Please Enter Valid Otp"))
        }
+        const delteEmail = await EmailVerification.findByIdAndDelete(isOtpValid._id)
+       
        
 
         const AgentUser = await Agent.findOne({email:filed})
@@ -244,6 +246,8 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
         const AccessToken =  AgentUser.GenrateAccessTocken()
         if(AgentUser.aprove == true)
         {
+            
+            
             return res.status(200)
             .cookie("AccessToken" , AccessToken ,options )
             .json(new ApiResponse(200 ,{success:true} ,"Loggin"))
