@@ -101,6 +101,10 @@ const CheckOtp = AsnycHandler(async (req, res) => {
                 new ApiResponse(400, { success: false }, "Please Enter Valid Otp")
             )
     }
+    const delteEmail = await EmailVerification.findByIdAndDelete(isVerificationExist._id)
+
+    
+    
 
 
     return res.status(200)
