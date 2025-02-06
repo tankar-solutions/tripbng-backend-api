@@ -9,6 +9,7 @@ import {
 import AirportCodes from '../models/AirportCodes.js';
 import AirlineCodes from '../models/AirlineCodes.js';
 
+//added
 const searchAirport = async (req, res) => {
 	try {
 		var data = [];
@@ -169,6 +170,7 @@ const sortFlights = (flights, sortOption) => {
 	return flights;
 };
 
+//added
 const searchFlight = async (req, res) => {
 	try {
 		const { data } = await axios.post(
@@ -258,6 +260,7 @@ const searchFlight = async (req, res) => {
 	}
 };
 
+//added
 const searchAirlines = async (req, res) => {
 	try {
 		const searchTerm = req.query.search;
@@ -280,6 +283,7 @@ const searchAirlines = async (req, res) => {
 	}
 };
 
+//added
 const getAirlinePolicy = async (req, res) => {
 	try {
 		const { data } = await axios.post(
@@ -297,6 +301,7 @@ const getAirlinePolicy = async (req, res) => {
 			.json(errorMessage(err?.message || 'Something went wrong'));
 	}
 };
+
 
 const getFlightReprice = async (req, res) => {
 	try {
@@ -334,6 +339,8 @@ const getFlightSSR = async (req, res) => {
 	}
 };
 
+
+//Done
 const getFlightSeats = async (req, res) => {
 	try {
 		const { data } = await axios.post(

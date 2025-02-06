@@ -15,7 +15,7 @@ fullname:{
 dob:{
     type:String,
     required:true
-},
+}, 
 panNumber:{
     type:String,
     required:true,

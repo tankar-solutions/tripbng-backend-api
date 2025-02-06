@@ -292,9 +292,11 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
         }
     }
 })
+
+
 export {
     SendMail,
-    sendSMS,
+    sendSMSOTP,
     CheckOtp,
     Register,
     Login,

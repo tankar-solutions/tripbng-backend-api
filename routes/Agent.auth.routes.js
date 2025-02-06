@@ -1,6 +1,6 @@
 import {
     SendMail,
-    sendSMS,
+    sendSMSOTP,
     CheckOtp,
     Register,
     Login,
@@ -10,7 +10,8 @@ import { Router } from "express"
 
 const router = Router();
 
-router.route('/sendSMS').post(sendSMS);
+router.route('/sendSMS').post(sendSMSOTP);
+router.route('sendMail').post(SendMail)
 router.route('/CheckOtp').post(CheckOtp);
 router.route('/Register').post(Register);
 router.route('/Login').post(Login);

@@ -1,5 +1,12 @@
-const Template2 =
+const Temp =
 {
+"Auth_Header":{
+		"IMEI_Number":process.env.ETRAV_IMEI_NO,
+		"IP_Address":process.env.ETRAV_IP,
+		"Password":process.env.ETRAV_PASSWORD,
+		"Request_Id":process.env.ETRAV_REQUESTID,
+		"UserId":process.env.ETRAV_USERID
+	},
     "Travel_Type": 0, //0 -DOMESTIC, 1 - INTERNATIONAL
     "Booking_Type": 0, //0 - ONE_WAY, 1- ROUNDTRIP, 2- SPECIALROUNDTRIP
     "TripInfo": [
@@ -11,6 +18,8 @@ const Template2 =
         
     ],
     "Adult_Count": "1",
+	"SrCitizen_Search":false,
+	"StudentFare_Search":false,
     "Child_Count": "0",
     "Infant_Count": "0",
     "Class_Of_Travel": "0", //0- ECONOMY, 1- BUSINESS, 2- FIRST, 3- PREMIUM_ECONOMY
@@ -33,7 +42,9 @@ const Template2 =
 }
 
 
-function FormateForApi1( data) {
+
+
+function FormateForApi1(data) {
     console.log("Formating Data For Api1....")
     if(data.Travel.Travel_Date)
         { 
@@ -42,7 +53,7 @@ function FormateForApi1( data) {
             const FormatedDate = `${dateArray[1]}/${dateArray[0]}/${dateArray[2]}`;
 
             
-            Template2.TripInfo = [{
+            Temp.TripInfo = [{
                 "Origin": data.Travel.FromCity,
                 "Destination": data.Travel.toCity,
                 "TravelDate": FormatedDate, // Convert DD-MM-YYYY to MM/DD/YYYY
@@ -54,7 +65,7 @@ function FormateForApi1( data) {
             const Today = TodayData.toLocaleDateString(); //DD-MM-YYYY
             const dateArray = Today.split("-");
             const FormatedDate = `${dateArray[1]}/${dateArray[0]}/${dateArray[2]}`;
-            Template2.TripInfo = [{
+            Temp.TripInfo = [{
                 "Origin": data.Travel.FromCity,
                 "Destination": data.Travel.toCity,
                 "TravelDate": FormatedDate, // Convert DD-MM-YYYY to MM/DD/YYYY
@@ -63,8 +74,8 @@ function FormateForApi1( data) {
         }
     
 
-    Template2.Adult_Count = data.Traveler.Adult_Count || 1;
-    Template2.Child_Count = data.Traveler.Child_Count[0] || 0;
+    Temp.Adult_Count =  new Number(data.Traveler.Adult_Count) || 1;
+    Temp.Child_Count = new Number(data.Traveler.Child_Count[0]) || 0;
 
     if(data.Traveler.Child_Count[0] !="0")
         {
@@ -77,20 +88,14 @@ function FormateForApi1( data) {
                 }
             }
             
-            Template2.Infant_Count = infant_count;
+            Temp.Infant_Count = 0;
         } 
    
 
-    Template2.Class_Of_Travel = data.Travel.Cabine || 0;
-    Template2.Travel_Type = data.Travel.Travel_Type || 0;
-    
-    if (data.Direct[0]) {
-        Template2.stops = [0]; // Direct flights only
-    } else {
-        Template2.stops = data.Direct[1] || [0, 1, 2, 3, 4]; // If not direct, take provided stops or default
-    }
-
-    return Template2;
+    Temp.Class_Of_Travel = data.Travel.Cabine || 0;
+    Temp.Travel_Type = data.Travel.Travel_Type || 0;
+   
+    return Temp;
 }
 export {FormateForApi1}
 
