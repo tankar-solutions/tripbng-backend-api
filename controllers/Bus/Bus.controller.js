@@ -199,7 +199,7 @@ const CancelBooking = AsnycHandler(async(req ,res)=>{
             new ApiResponse(400, {success:false},"Please Enter All The Feild")
         )
     }
-    const GetPNR = await sendPostRequest('http://domain/BusHost/BusAPIService.svc/JSONService/Bus_Ticketing' ,{} ,{
+    const GetPNR = await sendPostRequest('http://uat.etrav.in/BusHost/BusAPIService.svc/JSONService/Bus_Ticketing' ,{} ,{
         Auth_Header: authHeaders(),
         Booking_RefNo
     })
@@ -220,7 +220,7 @@ const CancelBooking = AsnycHandler(async(req ,res)=>{
         )
     }
 
-    const TicketCancellation = await sendPostRequest('http://domain/BusHost/BusAPIService.svc/JSONService/Bus_Cancellation',{},{
+    const TicketCancellation = await sendPostRequest('http://uat.etrav.in/BusHost/BusAPIService.svc/JSONService/Bus_Cancellation',{},{
         Auth_Header: authHeaders(),
         Booking_RefNo,
         BusTicketstoCancel:[{
@@ -238,7 +238,7 @@ const CancelBooking = AsnycHandler(async(req ,res)=>{
         )
     }
 })
-
+//Some new feture Added Sone
 
 
 
