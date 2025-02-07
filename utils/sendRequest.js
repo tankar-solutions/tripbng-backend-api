@@ -8,7 +8,8 @@ async function sendPostRequest(url, headers, body) {
         })
         return response
     } catch (error) {
-        console.error('Error:', error.response ? error.response.data : error.message);
+        const Error = error.response ? error.response.data : error.message
+        return Error
     }
 }
 

@@ -11,10 +11,29 @@ import AirlineCodes from "../../models/AirlineCodes.js"
 
 
 
-
 const head = {
     'Content-Type': 'application/json',
     apikey: process.env.KEY_API
+}
+const GetBookingId = async (Id) =>{
+    let FunctionResponse =0;
+    const data = await sendPostRequest('https://apitest.tripjack.com/fms/v1/review',head,{
+        priceIds:[Id]
+    })
+    if(data.errors){
+        if(data.errors[0].id)
+        {
+         FunctionResponse = data.errors[0].id
+         return FunctionResponse
+        }
+        else{
+           FunctionResponse = data.errors[0].message
+           return FunctionResponse
+        }
+        }
+    
+    FunctionResponse = data.data.bookingId;
+    return FunctionResponse;
 }
 
 const GetAllBestFlight = AsnycHandler(async (req ,res) =>{
@@ -134,13 +153,48 @@ const sampleData ={
 }
 
 
+const FlightReview = AsnycHandler(async(req ,res)=>{
+
+})
 
 const getFlightSeat = AsnycHandler(async(req ,res)=>{
+    const {Id , ApiNo} = req.body
+    if(ApiNo == "2")
+    {
+        const bookingid = await GetBookingId(Id)
+        //This is Run While id is Exired
+        if(bookingid =="Keys Passed in the request is already expired. Please pass valid keys")
+        {
+            return res.status(400)
+            .json(
+                new ApiResponse(400,{success:false} , bookingid)
+            )
+        }
+
+       //if we get the Booking Id then get the SeatMap using bookingId
+        const seatMap = await sendPostRequest('https://apitest.tripjack.com/fms/v1/seat',head,{bookingId:bookingid})
+
+        //if seat selection is not Applicable for the flight
+        if(seatMap.errors)
+        {
+          
+            return res.status(200)
+            .json(
+                new ApiResponse(200 ,{success:false} ,  seatMap.errors[0].message)
+            )
+        }
        
+        //This return seatMap if seatMaping is avble
+        return res.status(200)
+        .json(
+            new ApiResponse(200 ,{success:true , data:seatMap.data} ,"Data SuccessFully Fetched")
+        )
+    }
 })
 
 
 export {GetAllBestFlight , 
     SearchAirLine,
-    GetAirlinePolicy
+    GetAirlinePolicy,
+    getFlightSeat
 }
