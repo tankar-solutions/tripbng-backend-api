@@ -47,3 +47,8 @@ const GetAgentUrl = AsnycHandler(async(req ,res)=>{
     .json(new ApiResponse(400 , {success:true , data:Agent},"Data Fetch Successfully"))
 })
 //other fetures as like as user ............
+
+export {
+    GetAgentProfile,
+    GetAgentUrl
+}

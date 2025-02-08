@@ -23,7 +23,7 @@ const GetCpProfile = AsnycHandler(async(req ,res)=>{
 
 })
 
-const GetAgentUrl = AsnycHandler(async(req ,res)=>{
+const GetCpUrl = AsnycHandler(async(req ,res)=>{
     const user = req.user
     const id = req.params.id;
     if(!id)
@@ -46,3 +46,8 @@ const GetAgentUrl = AsnycHandler(async(req ,res)=>{
     return res.status(400)
     .json(new ApiResponse(400 , {success:true , data:cp},"Data Fetch Successfully"))
 })
+
+export {
+    GetCpProfile,
+    GetCpUrl
+}

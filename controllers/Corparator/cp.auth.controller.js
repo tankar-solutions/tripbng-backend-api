@@ -164,10 +164,18 @@ const Register = AsnycHandler(async(req ,res)=>{
 const Login = AsnycHandler(async(req,res)=>
 {
     const {contactFeild , password} = req.body;
-    const Agentuser = req.user;
-    const AgentFromDataBase = await Agent.findById(Agentuser._id)
+    let CpFromDataBase= null;
+    if(contactFeild.includes("@"))
+    {
 
-    const isPasswordCorrect = AgentFromDataBase.PassCompare(password)
+         CpFromDataBase = await Cp.find({email:contactFeild})
+    }
+    else
+    {
+         CpFromDataBase = await Cp.find({mobile:contactFeild})
+    }
+
+    const isPasswordCorrect = CpFromDataBase.PassCompare(password)
 
     if(!isPasswordCorrect)
     {
@@ -276,10 +284,10 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
 
 
         
-        const AgentUser = await Agent.findOne({mobile:filed})
-        console.log(AgentUser)
-        const AccessToken =  AgentUser.GenrateAccessTocken()
-        if(AgentUser.aprove == true)
+        const CpUser = await Cp.findOne({mobile:filed})
+        console.log(Cp)
+        const AccessToken =  CpUser.GenrateAccessTocken()
+        if(CpUser.aprove == true)
         {
             return res.status(200)
             .cookie("AccessToken" , AccessToken ,options )
