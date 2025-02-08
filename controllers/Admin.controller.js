@@ -7,7 +7,6 @@ import { isNull } from "../utils/FormCheck.js";
 import { generateOTP } from "../utils/generateOtp.js"
 import { sendMail } from "../utils/sendMail.js"
 import { EmailVerification } from "../models/EmailVerification.js";
-import { Agent } from "../models/Agent/Agent.models.js";
 import Users from "../models/Users.js";
 import { Cp } from "../models/Agent_Cp/Cp.models.js";
 import { Agent } from "../models/Agent_Cp/Agent.models.js";
@@ -351,7 +350,7 @@ const GiveAgentAprove = AsnycHandler(async(req,res)=>{
 
     return res.status(200)
     .json(
-        new ApiResponse(200 , {success:true} , "Congrts Your Request Aprove From the Admin")
+        new ApiResponse(200 , {success:true} , "Give Aprove")
     )
     
 })

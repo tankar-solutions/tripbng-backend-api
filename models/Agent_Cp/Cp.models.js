@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
-import { generateOTP } from "../../utils/generateOtp.js"
 import { sendMail } from "../../utils/sendMail.js"
 import { sendSMS } from "../../utils/SMS.js";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import { Admin } from "../Admin.js"; 
+
 
 const CpSchema = mongoose.Schema({
 
@@ -112,11 +113,13 @@ CpSchema.methods.PassCompare = async function(userPassword)
 
 CpSchema.post("save" ,async function()
 {
+    const AdminFind = await Admin.find({username:process.env.USERNAME_ADMIN})
+
     const cpUrl = 'something.com';
     const message = `Agency name ${this.cpName} is Request to Aprove Thire request click on this link ${cpUrl}`;
 
-    await sendMail(this.email , "Aprove request" , message);
-    await sendSMS(message , this.mobile);
+    await sendMail(AdminFind[0].email , "Aprove request" , message);
+    await sendSMS(message , AdminFind[0].mobile);
 })
 
 export const Cp = mongoose.model('Cp' , CpSchema)

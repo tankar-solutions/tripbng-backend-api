@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { generateOTP } from "../../utils/generateOtp.js"
 import { sendMail } from "../../utils/sendMail.js"
 import { sendSMS } from "../../utils/SMS.js";
+import { Admin } from "../Admin.js"; 
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
@@ -113,12 +114,12 @@ AgentSchema.methods.PassCompare = async function(userPassword)
 
 AgentSchema.post("save" ,async function()
 {
+    const AdminFind = await Admin.find({username:process.env.USERNAME_ADMIN})
     const AgencyUrl = 'something.com';
     const message = `Agency name ${this.agencyName} is Request to Aprove Thire request click on this link ${AgencyUrl}`;
 
-    const otp = generateOTP();
-    await sendMail(this.email , "Aprove request" , message);
-    await sendSMS(message , this.mobile);
+    await sendMail(AdminFind[0].email , "Aprove request" , message);
+    await sendSMS(message , AdminFind[0].mobile);
 })
 
 export const Agent = mongoose.model('Agent' , AgentSchema)

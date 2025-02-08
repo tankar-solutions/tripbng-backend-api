@@ -234,7 +234,7 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
 
     if(filed.includes('@'))
     {
-       const isOtpValid = OtpVfy.findOne({
+       const isOtpValid = await OtpVfy.findOne({
         veryficationType: type,
         veryficationFeild: filed,
         otp: otp
@@ -245,7 +245,7 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
         return res.status(200)
         .json( new ApiResponse(200 , {success:false} , "Please Enter Valid Otp"))
        }
-        const delteEmail = await EmailVerification.findByIdAndDelete(isOtpValid._id)
+        const delteEmail = await isOtpValid.findByIdAndDelete(isOtpValid._id)
        
        
 

@@ -25,6 +25,6 @@ router.route('/forgetPass').post(UserVerify ,ForgetPassword)
 router.route('/ChangeForgetPass').post(UserVerify ,ChangeForgetPassword)
 router.route('/getalluser').get(UserVerify ,GetAllUser)
 router.route('/logout').post(UserVerify , AdminLogout)
-router.route('/getallagent').post(UserVerify , GetAllAgents)
+router.route('/getallagent').get(UserVerify , GetAllAgents)
 router.route('/Aprove').post(UserVerify,GiveAgentAprove)
 export default router;

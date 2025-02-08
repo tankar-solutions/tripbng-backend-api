@@ -118,9 +118,9 @@ const CheckOtp = AsnycHandler(async (req, res) => {
 
 
 const Register = AsnycHandler(async(req ,res)=>{
-    const {agencyName,mobile,email,country,state,city,pincode,address1,address2,address3,adharNumber,gstNumber,condition} = req.body;
+    const {agencyName,mobile,email,country,state,city,pincode,address1,address2,address3,adharNumber,gstNumber,condition,password} = req.body;
 
-    if(isNull([agencyName , mobile , email  , country , state , city , pincode , address1 , address2 , address3 , adharNumber , gstNumber]))
+    if(isNull([agencyName , mobile , email  , country , state , city , pincode , address1 , address2 , address3 , adharNumber , gstNumber,password]))
     {
         return res.status(400)
         .json(new ApiResponse(400,{success:false} , "Please Enter All The fields"))
@@ -140,7 +140,8 @@ const Register = AsnycHandler(async(req ,res)=>{
             address3,
             adharNumber,
             gstNumber,
-            condition
+            condition,
+            password
         }
     )
 
@@ -163,9 +164,20 @@ const Register = AsnycHandler(async(req ,res)=>{
 
 const Login = AsnycHandler(async(req,res)=>
 {
+    let type = 'login'
     const {contactfield , password} = req.body;
-    const Agentuser = req.user;
-    const AgentFromDataBase = await Agent.findById(Agentuser._id)
+    console.log(contactfield);
+    
+    let AgentFromDataBase= null;
+        if(contactfield.includes("@"))
+        {
+    
+            AgentFromDataBase = await Agent.findOne({email:contactfield})
+        }
+        else
+        {
+            AgentFromDataBase = await Agent.findOne({mobile:contactfield})
+        }
 
     const isPasswordCorrect = AgentFromDataBase.PassCompare(password)
 
@@ -182,8 +194,8 @@ const Login = AsnycHandler(async(req,res)=>
         const otp  = generateOTP();
         await sendMail(contactfield , "Login Verification mail" , `Your Otp is ${otp}`)
         const sendEmailObject = await OtpVfy.create({
-            veryficationType:'login',
-            veryficationfield:contactfield,
+            veryficationType:type,
+            veryficationFeild:contactfield,
             otp:otp
 
         })
@@ -199,10 +211,11 @@ const Login = AsnycHandler(async(req,res)=>
     else 
     {
         const otp = generateOTP();
+        console.log(contactfield)
         await sendSMS(`Your OTP is ${otp}` , contactfield)
         const sendSMSObject = await OtpVfy.create({
-            veryficationType:'login',
-            veryficationfield:contactfield,
+            veryficationType:type,
+            veryficationFeild:contactfield,
             otp:otp
 
         })
@@ -226,9 +239,9 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
 
     if(field.includes('@'))
     {
-       const isOtpValid = OtpVfy.findOne({
+       const isOtpValid = await OtpVfy.findOne({
         veryficationType: type,
-        veryficationfield: field,
+        veryficationFeild: field,
         otp: otp
        })
 
@@ -237,12 +250,8 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
         return res.status(200)
         .json( new ApiResponse(200 , {success:false} , "Please Enter Valid Otp"))
        }
-        const delteEmail = await EmailVerification.findByIdAndDelete(isOtpValid._id)
-       
-       
-
+        const delteEmail = await OtpVfy.findByIdAndDelete(isOtpValid._id)
         const AgentUser = await Agent.findOne({email:field})
-
         const AccessToken =  AgentUser.GenrateAccessTocken()
         if(AgentUser.aprove == true)
         {
