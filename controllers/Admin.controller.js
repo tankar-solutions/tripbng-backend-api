@@ -9,6 +9,8 @@ import { sendMail } from "../utils/sendMail.js"
 import { EmailVerification } from "../models/EmailVerification.js";
 import { Agent } from "../models/Agent/Agent.models.js";
 import Users from "../models/Users.js";
+import { Cp } from "../models/Agent_Cp/Cp.models.js";
+import { Agent } from "../models/Agent_Cp/Agent.models.js";
 const options = {
     httpOnly: true,
     secure: true
@@ -321,7 +323,13 @@ const GetAllAgents = AsnycHandler(async(req,res)=>{
 
 const GiveAgentAprove = AsnycHandler(async(req,res)=>{
     const {_id} = req.body;
+    const user= req.user;
 
+    if(user.Usertype != "Admin")
+    {
+        return res.status(400)
+        .json(new ApiResponse(400 , {success:false , data:"You Can't Aprove This request , you are not Admin"}  , "you Can't Aprove This Request Your are not Admin" ))
+    }
     if(!_id)
     {
         return res.status(400)
@@ -349,6 +357,59 @@ const GiveAgentAprove = AsnycHandler(async(req,res)=>{
     
 })
 
+const GetAllCp = AsnycHandler(async(req,res)=>{
+
+    const UnAproveCp = await Cp.find({aprove:false}) || null
+    const AproveCp= await Cp.find({aprove:true}) || null
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , {success:true , data:{
+            UnAproveCp,
+            AproveCp
+        }} , "Data Fetch SuccessFully" )
+    )
+
+    
+})
+
+const GiveCpAprove = AsnycHandler(async(req,res)=>{
+    const {_id} = req.body;
+    const user= req.user;
+
+    if(user.Usertype != "Admin")
+    {
+        return res.status(400)
+        .json(new ApiResponse(400 , {success:false , data:"You Can't Aprove This request , you are not Admin"}  , "you Can't Aprove This Request Your are not Admin" ))
+    }
+    if(!_id)
+    {
+        return res.status(400)
+        .json(new ApiResponse(400 , {success:false} , "Id is not Geted"))
+    }
+
+    const CpUser = await Agent.findById(_id)
+    if(!CpUser)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false} , "Id is wrong")
+        )
+    }
+
+    CpUser.aprove = true;
+    await CpUser.save()
+    await sendMail(CpUser.email , "Aprove Success" , "Congrts Admin Aprove Your Request")
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , {success:true} , "Congrts Your Request Aprove From the Admin")
+    )
+    
+})
+
+
+
 export {
     CreateSuperAdmin,
     LoginAdmin,
@@ -360,5 +421,7 @@ export {
     ChangeForgetPassword,
     GetAllUser,
     GetAllAgents,
-    GiveAgentAprove
+    GiveAgentAprove,
+    GetAllCp,
+    GiveCpAprove
 }

@@ -7,10 +7,7 @@ import bcrypt from "bcrypt"
 
 const AgentSchema = mongoose.Schema({
 
-    agentType:{
-        type:String,
-        enum:['become a retailer' , 'become a distributor']
-    },
+    
     agencyName:{
         type:String,
         required:true,
@@ -78,6 +75,10 @@ const AgentSchema = mongoose.Schema({
     condition:{
         type:Boolean,
         default:false
+    },
+    Usertype:{
+        type:String,
+        default:"Agent"
     }
 
 
@@ -89,7 +90,8 @@ AgentSchema.methods.GenrateAccessTocken = function()
 {
   return jwt.sign(
     {
-      _id:this._id
+      _id:this._id,
+      type:this.Usertype
 
     },
     process.env.JWT_SECRET,

@@ -36,6 +36,10 @@ const adminSchema = new mongoose.Schema(
     },
     logo: {
       type: String,
+    },
+    Usertype:{
+      type:String,
+      default:"Admin"
     }
   },
   { timestamps: true }
@@ -59,7 +63,8 @@ adminSchema.methods.GenrateAccessTocken = function()
     {
       _id:this._id,
       username:this.username,
-      email:this.email
+      email:this.email,
+      type:this.Usertype
 
     },
     process.env.JWT_SECRET,

@@ -4,7 +4,7 @@ import { sendMail } from "../../utils/sendMail.js"
 import { AsnycHandler } from "../../utils/AsnycHandler.js"
 import { OtpVfy } from "../../models/Agent_Cp/OtpVfy.models.js"
 import { isNull } from "../../utils/FormCheck.js"
-import { Agent } from "../../models/Agent_Cp/Agent.models.js"
+import { Cp } from "../../models/Agent_Cp/Cp.models.js"
 import { sendSMS } from "../../utils/SMS.js"
 
 const options = {
@@ -118,17 +118,17 @@ const CheckOtp = AsnycHandler(async (req, res) => {
 
 
 const Register = AsnycHandler(async(req ,res)=>{
-    const {agencyName,mobile,email,country,state,city,pincode,address1,address2,address3,adharNumber,gstNumber,condition} = req.body;
+    const {cpName,mobile,email,country,state,city,pincode,address1,address2,address3,adharNumber,gstNumber,condition} = req.body;
 
-    if(isNull([agencyName , mobile , email  , country , state , city , pincode , address1 , address2 , address3 , adharNumber , gstNumber]))
+    if(isNull([cpName , mobile , email  , country , state , city , pincode , address1 , address2 , address3 , adharNumber , gstNumber]))
     {
         return res.status(400)
         .json(new ApiResponse(400,{success:false} , "Please Enter All The feilds"))
     }
 
-    const agn = await Agent.create(
+    const cpr = await Cp.create(
         {
-            agencyName ,
+            cpName ,
             mobile,
             email,
             country,
@@ -144,7 +144,7 @@ const Register = AsnycHandler(async(req ,res)=>{
         }
     )
 
-    if(!agn)
+    if(!cpr)
     {
         return res.status(400)
         .jaon(
@@ -154,7 +154,7 @@ const Register = AsnycHandler(async(req ,res)=>{
 
     return res.status(200)
     .json(
-        new ApiResponse(200,{success:true,data:agn} , "Your Request is sent to Admin We inform All the updates through SMS/email/whatsapp")
+        new ApiResponse(200,{success:true,data:cpr} , "Your Request is sent to Admin We inform All the updates through SMS/email/whatsapp")
     )
 
 

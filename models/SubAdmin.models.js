@@ -23,6 +23,10 @@ const SubAdminSchema = new mongoose.Schema(
         {
             type:String,
             required:true,
+        },
+        Usertype:{
+          type:String,
+          default:"SubAdmin"
         }
 
     },{timestamps:true}
@@ -46,7 +50,8 @@ SubAdminSchema.methods.GenrateAccessTocken = function()
     {
       _id:this._id,
       username:this.username,
-      email:this.email
+      email:this.email,
+      type:this.Usertype
 
     },
     process.env.JWT_SECRET,

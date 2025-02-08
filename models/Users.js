@@ -27,6 +27,10 @@ const usersSchema = new mongoose.Schema(
 		address: { type: String },
 		state: { type: String },
 		pincode: { type: String },
+		Usertype:{
+		  type:String,
+		  default:"User"	
+		}
 	},
 	{ timestamps: true }
 );

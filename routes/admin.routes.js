@@ -11,19 +11,19 @@ import  {
     GetAllUser,
     GiveAgentAprove
 } from '../controllers/admin.controller.js'; 
-import {AdminVerify} from "../middlewares/AdminVrfy.js"
+import {UserVerify} from "../middlewares/Uservrfy.js"
 
 const router = express.Router();
 
 router.route('/testCreate').post(CreateSuperAdmin)
 router.route('/login').post(LoginAdmin)
 router.route('/vfyOTPLogin').post(veryfyOTPLogin)
-router.route('/createSubAdmin').post(AdminVerify , CreateSubAdmin)
-router.route('/changePass').post(AdminVerify , ChangePassword)
-router.route('/forgetPass').post(AdminVerify ,ForgetPassword)
-router.route('/ChangeForgetPass').post(AdminVerify ,ChangeForgetPassword)
-router.route('/getalluser').get(GetAllUser)
-router.route('/logout').post(AdminVerify , AdminLogout)
-router.route('/Aprove').post(GiveAgentAprove)
-
+router.route('/createSubAdmin').post(UserVerify , CreateSubAdmin)
+router.route('/changePass').post(UserVerify , ChangePassword)
+router.route('/forgetPass').post(UserVerify ,ForgetPassword)
+router.route('/ChangeForgetPass').post(UserVerify ,ChangeForgetPassword)
+router.route('/getalluser').get(UserVerify ,GetAllUser)
+router.route('/logout').post(UserVerify , AdminLogout)
+router.route('/Aprove').post(UserVerify,GiveAgentAprove)
+router.route('/getagenturl/:id').get()
 export default router;
