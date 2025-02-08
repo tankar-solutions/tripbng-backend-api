@@ -34,6 +34,7 @@ const GetBookingId = async (Id) => {
     return FunctionResponse;
 }
 
+//complt
 const GetAllBestFlight = AsnycHandler(async (req, res) => {
 
     const Data = req.body
@@ -51,7 +52,7 @@ const GetAllBestFlight = AsnycHandler(async (req, res) => {
 
 })
 
-
+//complt
 const SearchAirLine = AsnycHandler(async (req, res) => {
 
     try {
@@ -81,7 +82,7 @@ const SearchAirLine = AsnycHandler(async (req, res) => {
 
 })
 
-
+//complt
 const GetAirlinePolicy = AsnycHandler(async (req, res) => {
     const { FareId, SearchKey, FlightKey, ApiNo, id } = req.body
 
@@ -125,7 +126,6 @@ const GetAirlinePolicy = AsnycHandler(async (req, res) => {
 
 })
 
-
 const sampleData = {
     "Search_Key": "",
     "Flight_Keys": [""
@@ -147,37 +147,6 @@ const sampleData = {
         }
     ]
 }
-
-
-const FlightReview = AsnycHandler(async (req, res) => {
-
-})
-
-
-
-// const Api1SeatData = {
-//     "Search_Key":"",
-//     "Flight_Keys":[""],
-
-//     "PAX_Details": [
-//         {
-//             "Pax_type": 0,
-//             "Title": "Mr",
-//             "First_Name": "Testing",
-//             "Last_Name": "Sample",
-//             "Gender": 0,
-//             "Age": null,
-//             "DOB": null,
-//             "Passport_Number": null,
-//             "Passport_Issuing_Country": null,
-//             "Passport_Expiry": null,
-//             "Nationality": null,
-//             "FrequentFlyerDetails": null
-//         }
-//     ]
-// }
-
-
 //complete
 const GetFlightSeat = AsnycHandler(async (req, res) => {
     const { Id, ApiNo, Api1Data} = req.body;
