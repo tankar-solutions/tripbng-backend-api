@@ -47,7 +47,7 @@ const SendMail = AsnycHandler(async (req, res) => {
 
 })
 //This controller Send user to otp on the sms
-const sendSMSOTP = AsnycHandler(async (req, res) => {
+const SendSmsOtp = AsnycHandler(async (req, res) => {
     const { phone } = req.body;
     
 
@@ -296,7 +296,7 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
 
 export {
     SendMail,
-    sendSMSOTP,
+    SendSmsOtp,
     CheckOtp,
     Register,
     Login,

@@ -5,11 +5,11 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 import flightRouter from './routes/flight.js';
-import UserRouter from './routes/user.js';
-import DMCRouter from './routes/dmc.js';
+import UserRouter from './routes/user.routes.js';
+import DMCRouter from './routes/dmc.routes.js';
 import AdminRouter from './routes/admin.routes.js';
 import AgentRoutes from "./routes/Agent.auth.routes.js"
-import {Flight2} from "./routes/Flight2.routes.js"
+import {Flight} from "./routes/Flight.routes.js"
 import { BusRoutes } from './routes/bus.routes.js';
 // import BestRouter from "./routes/bestFlight.routes.js"
 
@@ -37,7 +37,7 @@ app.use('/dmc', DMCRouter);
 app.use('/admin', AdminRouter);
 // app.use('/best', BestRouter);
 app.use('/AgentAuth' , AgentRoutes);
-app.use('/best' , Flight2);
+app.use('/best' , Flight);
 app.use('/bus' , BusRoutes);
 
 export {app}

@@ -10,7 +10,7 @@ import  {
     veryfyOTPLogin,
     GetAllUser,
     GiveAgentAprove
-} from '../controllers/Admin.controller.js'; 
+} from '../controllers/admin.controller.js'; 
 import {AdminVerify} from "../middlewares/AdminVrfy.js"
 
 const router = express.Router();

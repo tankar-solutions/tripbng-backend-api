@@ -1,8 +1,8 @@
 /** @format */
 
 import express from 'express';
-import AuthController from '../controllers/authController.js';
-import UserController from '../controllers/userController.js';
+import AuthController from '../controllers/auth.controller.js';
+import UserController from '../controllers/user.controller.js';
 import { auth } from '../middlewares/auth.js';
 import multer from 'multer';
 

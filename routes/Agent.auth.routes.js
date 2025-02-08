@@ -1,16 +1,17 @@
 import {
     SendMail,
-    sendSMSOTP,
+    SendSmsOtp,
     CheckOtp,
     Register,
     Login,
     LoginVrfy
-} from "../controllers/Agent/Agent.auth.controller.js"
+} from "../controllers/Agent/agent.auth.controller.js"
+
 import { Router } from "express"
 
 const router = Router();
 
-router.route('/sendSMS').post(sendSMSOTP);
+router.route('/sendSMS').post(SendSmsOtp);
 router.route('sendMail').post(SendMail)
 router.route('/CheckOtp').post(CheckOtp);
 router.route('/Register').post(Register);

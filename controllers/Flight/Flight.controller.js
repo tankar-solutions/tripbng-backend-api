@@ -1,4 +1,3 @@
-import axios from "axios";
 import { AsnycHandler } from "../../utils/AsnycHandler.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { FormateForApi2 } from "../../utils/wrapper/Formate2.util.js";
@@ -85,7 +84,7 @@ const SearchAirLine = AsnycHandler(async (req, res) => {
 
 const GetAirlinePolicy = AsnycHandler(async (req, res) => {
     const { FareId, SearchKey, FlightKey, ApiNo, id } = req.body
-    // console.log(FareId ,SearchKey , FlightKey , ApiNo , id)
+
     if (ApiNo == 1) {
         if (isNull([FareId, SearchKey, FlightKey, ApiNo])) {
             return res.status(400)
@@ -180,7 +179,7 @@ const FlightReview = AsnycHandler(async (req, res) => {
 
 
 //complete
-const getFlightSeat = AsnycHandler(async (req, res) => {
+const GetFlightSeat = AsnycHandler(async (req, res) => {
     const { Id, ApiNo, Api1Data} = req.body;
     // const {username} = req.user;
 
@@ -252,9 +251,11 @@ const getFlightSeat = AsnycHandler(async (req, res) => {
 })
 
 
+
+
 export {
     GetAllBestFlight,
     SearchAirLine,
     GetAirlinePolicy,
-    getFlightSeat
+    GetFlightSeat
 }

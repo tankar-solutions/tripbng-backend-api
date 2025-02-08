@@ -1,8 +1,8 @@
 import {GetAllBestFlight , 
-    SearchAirLine,
-    GetAirlinePolicy,
-    getFlightSeat
-} from "../controllers/Flight/Flight.controller.js"
+        SearchAirLine,
+        GetAirlinePolicy,
+        GetFlightSeat
+} from "../controllers/Flight/flight.controller.js"
 
 import { Router } from "express"
 
@@ -11,7 +11,7 @@ const router = Router();
 router.route('/getFlights').post(GetAllBestFlight)
 router.route('/GetAirPolicy').post(GetAirlinePolicy)
 router.route('/SearchAirLine').get(SearchAirLine)
-router.route('/seatmap').post(getFlightSeat)
+router.route('/seatmap').post(GetFlightSeat)
 
-const Flight2 = router
-export {Flight2};
+const Flight = router
+export {Flight};

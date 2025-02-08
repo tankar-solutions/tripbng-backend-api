@@ -1,7 +1,7 @@
 /** @format */
 
 import express from 'express';
-import DMCController from '../controllers/dmcController.js';
+import DMCController from '../controllers/dmc.controller.js';
 
 const router = express.Router();
 
