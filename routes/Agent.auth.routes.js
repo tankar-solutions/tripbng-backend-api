@@ -12,11 +12,11 @@ import { Router } from "express"
 const router = Router();
 
 router.route('/sendSMS').post(SendSmsOtp);
-router.route('sendMail').post(SendMail)
-router.route('/CheckOtp').post(CheckOtp);
-router.route('/Register').post(Register);
-router.route('/Login').post(Login);
-router.route('/LoginVrfy').post(LoginVrfy)
+router.route('/sendmail').post(SendMail)
+router.route('/checkotp').post(CheckOtp);
+router.route('/register').post(Register);
+router.route('/login').post(Login);
+router.route('/loginVrfy').post(LoginVrfy)
 
 const AgentRoutes = router;
 export default AgentRoutes

@@ -46,14 +46,14 @@ const LoginAdmin = AsnycHandler(async (req, res) => {
     if (!username) {
         return res.status(400)
             .json(
-                new ApiResponse(400, { success: false }, "Please Enter The userId")
+                new ApiResponse(400, { success: false , data:"Please Enter the username" }, "Please Enter The userId")
             )
     }
 
     if (!password) {
         return res.status(400)
             .json(
-                new ApiResponse(400, { success: false }, "Please Enter the password")
+                new ApiResponse(400, { success: false , data:"Please Enter The password" }, "Please Enter the password")
             )
     }
 
@@ -193,7 +193,6 @@ const CreateSubAdmin = AsnycHandler(async (req, res) => {
 })
 
 const ChangePassword = AsnycHandler(async (req, res) => {
-    console.log("code arrive here 1")
     const { CurrectPass, NewPass } = req.body;
     const user = req.user;
 
@@ -248,11 +247,11 @@ const ForgetPassword = AsnycHandler(async (req, res) => {
 
 
 const ChangeForgetPassword = AsnycHandler(async (req, res) => {
-    const {code , newPassord } = req.body;
+    const {code , newPassword } = req.body;
     if (!code) {
         return res.status(400).json(new ApiResponse(400, { success: false }, "OTP is required"))
     }
-    if (!newPassord) {
+    if (!newPassword) {
         return res.status(400)
             .json(
                 new ApiResponse(400, { success: false }, "Please Enter The password")
@@ -277,7 +276,7 @@ const ChangeForgetPassword = AsnycHandler(async (req, res) => {
 
 
     const ChangePassUser = await Admin.findById(user._id)
-    ChangePassUser.password = newPassord;
+    ChangePassUser.password = newPassword;
     await  ChangePassUser.save();
     
 

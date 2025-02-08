@@ -29,7 +29,7 @@ const SendMail = AsnycHandler(async (req, res) => {
 
     const EmailVrf = await OtpVfy.create({
         veryficationType: 'email',
-        veryficationFeild: Mail,
+        veryficationfield: Mail,
         otp: otp
     })
 
@@ -69,7 +69,7 @@ const SendSmsOtp = AsnycHandler(async (req, res) => {
 
     const setDataBase = await OtpVfy.create({
         veryficationType: 'phone',
-        veryficationFeild: phone,
+        veryficationfield: phone,
         otp: otp
     })
     res.status(200).json(
@@ -79,17 +79,17 @@ const SendSmsOtp = AsnycHandler(async (req, res) => {
 })
 //this controller The veryfie the otp which is send to the user 
 const CheckOtp = AsnycHandler(async (req, res) => {
-    const { type, filed, otp } = req.body;
-    if (isNull[type, filed, otp]) {
+    const { type, field, otp } = req.body;
+    if (isNull[type, field, otp]) {
         return res.status(400)
             .json(400, { success: false }, "Please Enter the All Filed ")
     }
 
-    console.log(type, filed, otp)
+    console.log(type, field, otp)
 
     const isVerificationExist = await OtpVfy.findOne({
         veryficationType: type,
-        veryficationFeild: filed,
+        veryficationfield: field,
         otp: otp
     });
     console.log(isVerificationExist)
@@ -123,7 +123,7 @@ const Register = AsnycHandler(async(req ,res)=>{
     if(isNull([agencyName , mobile , email  , country , state , city , pincode , address1 , address2 , address3 , adharNumber , gstNumber]))
     {
         return res.status(400)
-        .json(new ApiResponse(400,{success:false} , "Please Enter All The feilds"))
+        .json(new ApiResponse(400,{success:false} , "Please Enter All The fields"))
     }
 
     const agn = await Agent.create(
@@ -163,7 +163,7 @@ const Register = AsnycHandler(async(req ,res)=>{
 
 const Login = AsnycHandler(async(req,res)=>
 {
-    const {contactFeild , password} = req.body;
+    const {contactfield , password} = req.body;
     const Agentuser = req.user;
     const AgentFromDataBase = await Agent.findById(Agentuser._id)
 
@@ -177,13 +177,13 @@ const Login = AsnycHandler(async(req,res)=>
         )
     }
 
-    if(contactFeild.includes('@'))
+    if(contactfield.includes('@'))
     {
         const otp  = generateOTP();
-        await sendMail(contactFeild , "Login Verification mail" , `Your Otp is ${otp}`)
+        await sendMail(contactfield , "Login Verification mail" , `Your Otp is ${otp}`)
         const sendEmailObject = await OtpVfy.create({
             veryficationType:'login',
-            veryficationFeild:contactFeild,
+            veryficationfield:contactfield,
             otp:otp
 
         })
@@ -199,10 +199,10 @@ const Login = AsnycHandler(async(req,res)=>
     else 
     {
         const otp = generateOTP();
-        await sendSMS(`Your OTP is ${otp}` , contactFeild)
+        await sendSMS(`Your OTP is ${otp}` , contactfield)
         const sendSMSObject = await OtpVfy.create({
             veryficationType:'login',
-            veryficationFeild:contactFeild,
+            veryficationfield:contactfield,
             otp:otp
 
         })
@@ -218,17 +218,17 @@ const Login = AsnycHandler(async(req,res)=>
 
 const LoginVrfy = AsnycHandler(async(req,res)=>
 {
-    const { type, filed, otp } = req.body;
-    if (isNull[type, filed, otp]) {
+    const { type, field, otp } = req.body;
+    if (isNull[type, field, otp]) {
         return res.status(400)
             .json(400, { success: false }, "Please Enter the All Filed ")
     }
 
-    if(filed.includes('@'))
+    if(field.includes('@'))
     {
        const isOtpValid = OtpVfy.findOne({
         veryficationType: type,
-        veryficationFeild: filed,
+        veryficationfield: field,
         otp: otp
        })
 
@@ -241,7 +241,7 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
        
        
 
-        const AgentUser = await Agent.findOne({email:filed})
+        const AgentUser = await Agent.findOne({email:field})
 
         const AccessToken =  AgentUser.GenrateAccessTocken()
         if(AgentUser.aprove == true)
@@ -264,7 +264,7 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
     {
         const isOtpValid = OtpVfy.findOne({
             veryficationType: type,
-            veryficationFeild: filed,
+            veryficationfield: field,
             otp: otp
            })
     
@@ -276,7 +276,7 @@ const LoginVrfy = AsnycHandler(async(req,res)=>
 
 
         
-        const AgentUser = await Agent.findOne({mobile:filed})
+        const AgentUser = await Agent.findOne({mobile:field})
         console.log(AgentUser)
         const AccessToken =  AgentUser.GenrateAccessTocken()
         if(AgentUser.aprove == true)
