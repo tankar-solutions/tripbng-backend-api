@@ -10,6 +10,7 @@ import  {
     veryfyOTPLogin,
     GetAllUser,
     GetAllAgents,
+    GetAllCp,
     GiveAgentAprove
 } from '../controllers/admin.controller.js'; 
 import {UserVerify} from "../middlewares/Uservrfy.js"
@@ -26,5 +27,6 @@ router.route('/ChangeForgetPass').post(UserVerify ,ChangeForgetPassword)
 router.route('/getalluser').get(UserVerify ,GetAllUser)
 router.route('/logout').post(UserVerify , AdminLogout)
 router.route('/getallagent').get(UserVerify , GetAllAgents)
+router.route('/getallcp').get(UserVerify , GetAllCp)
 router.route('/Aprove').post(UserVerify,GiveAgentAprove)
 export default router;
