@@ -12,7 +12,8 @@ import  {
     GetAllAgents,
     GetAllCp,
     GiveAgentAprove
-} from '../controllers/admin.controller.js'; 
+} from '../controllers/Admin/admin.controller.js'; 
+import { GetBalance } from '../controllers/Admin/admin.pyment.controller.js';
 import {UserVerify} from "../middlewares/Uservrfy.js"
 
 const router = express.Router();
@@ -29,4 +30,7 @@ router.route('/logout').post(UserVerify , AdminLogout)
 router.route('/getallagent').get(UserVerify , GetAllAgents)
 router.route('/getallcp').get(UserVerify , GetAllCp)
 router.route('/Aprove').post(UserVerify,GiveAgentAprove)
+
+
+router.route('/getbalance').post(GetBalance);
 export default router;
