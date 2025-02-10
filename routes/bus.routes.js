@@ -10,7 +10,7 @@ import { Router } from "express"
 
 const router = Router();
 
-router.route('/home').get((req,res)=>{res.send("/")})
+
 router.route('/searchbus').post(SearchBus)
 router.route('/seatmap').post(BusSeatMap)
 router.route('/tempbooking').post(TempBooking)
