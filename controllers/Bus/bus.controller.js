@@ -309,6 +309,17 @@ const CancelBooking = AsnycHandler(async(req ,res)=>{
     )
 })
 
+const getCitylist = AsnycHandler(async(req,res)=>{
+    const get = await sendPostRequest('http://uat.etrav.in/BusHost/BusAPIService.svc/JSONService/Bus_CityList' , {} , {
+        Auth_Header: authHeaders(),
+
+
+
+    })
+    return res.status(200)
+    .json(new ApiResponse(200 , {success:true , data:get.data} , "citylist") )
+})
+
 
 //Some new feture Added Sone
 
@@ -319,5 +330,6 @@ export {SearchBus,
     TempBooking,
     GetBookingDetails,
     GetBookingCancellationDetails,
-    CancelBooking
+    CancelBooking,
+	getCitylist
 }
