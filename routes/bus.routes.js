@@ -3,7 +3,8 @@ import {SearchBus,
     TempBooking,
     GetBookingDetails,
     GetBookingCancellationDetails,
-    CancelBooking
+    CancelBooking,
+        getCitylist
 } from "../controllers/Bus/bus.controller.js"
 import { Router } from "express"
 
@@ -15,6 +16,8 @@ router.route('/tempbooking').post(TempBooking)
 router.route('/getbookingdetails').post(GetBookingDetails)
 router.route('/getbookingcancellationdetails').post(GetBookingCancellationDetails)
 router.route('cancelbooking').post(CancelBooking)
+router.route('/getcitylist').get(getCitylist)
+
 const BusRoutes = router;
 
 export {BusRoutes}
