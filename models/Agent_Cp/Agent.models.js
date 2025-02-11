@@ -115,7 +115,7 @@ AgentSchema.methods.PassCompare = async function(userPassword)
 AgentSchema.post("save" ,async function()
 {
     const AdminFind = await Admin.find({username:process.env.USERNAME_ADMIN})
-    const AgencyUrl = 'something.com';
+     const AgencyUrl = `https://tripbng-backend-api-c6kw.onrender.com/AgentAuth/getagentprofile/${this._id}`;
     const message = `Agency name ${this.agencyName} is Request to Aprove Thire request click on this link ${AgencyUrl}`;
 
     await sendMail(AdminFind[0].email , "Aprove request" , message);
