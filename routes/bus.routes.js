@@ -4,7 +4,8 @@ import {SearchBus,
     GetBookingDetails,
     GetBookingCancellationDetails,
     CancelBooking,
-        getCitylist
+        getCitylist,
+        Citycode
 } from "../controllers/Bus/bus.controller.js"
 import { Router } from "express"
 
@@ -18,6 +19,8 @@ router.route('/getbookingdetails').post(GetBookingDetails)
 router.route('/getbookingcancellationdetails').post(GetBookingCancellationDetails)
 router.route('cancelbooking').post(CancelBooking)
 router.route('/getcitylist').get(getCitylist)
+router.route('/getcitycode').get(Citycode)
+
 
 const BusRoutes = router;
 
