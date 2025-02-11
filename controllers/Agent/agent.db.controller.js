@@ -33,17 +33,17 @@ const GetAgentUrl = AsnycHandler(async(req ,res)=>{
             new ApiResponse(400 , {success:false , data:"invalid url"} , "Invalid url")
         )
     }
-    let Agent =null;
+    let Agentuser =null;
+   console.log(user)
     if(user.Usertype == "Admin")
     {
-     Agent = await Agent.findById(id).select("-password")
+     Agentuser = await Agent.findById(id).select("-password")
     }
     else 
     {
-        Agent = await Agent.findById(id).select("-password -aprove")
+        Agentuser = await Agent.findById(id).select("-password -aprove")
     }
-
-    if(!Agent)
+    if(!Agentuser)
     {
         return res.status(400)
         .json(
@@ -51,7 +51,7 @@ const GetAgentUrl = AsnycHandler(async(req ,res)=>{
         )
     }
     return res.status(200)
-    .json(new ApiResponse(200 , {success:true , data:Agent},"Data Fetch Successfully"))
+    .json(new ApiResponse(200 , {success:true , data:Agentuser},"Data Fetch Successfully"))
 })
 //other fetures as like as user ............
 
