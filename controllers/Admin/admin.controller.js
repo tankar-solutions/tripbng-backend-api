@@ -45,18 +45,25 @@ const LoginAdmin = AsnycHandler(async (req, res) => {
     if (!username) {
         return res.status(400)
             .json(
-                new ApiResponse(400, { success: false , data:"Please Enter the username" }, "Please Enter The userId")
+                new ApiResponse(400, { success: false, data: "Please Enter the username" }, "Please Enter The userId")
             )
     }
 
     if (!password) {
         return res.status(400)
             .json(
-                new ApiResponse(400, { success: false , data:"Please Enter The password" }, "Please Enter the password")
+                new ApiResponse(400, { success: false, data: "Please Enter The password" }, "Please Enter the password")
             )
     }
 
     const user = await Admin.findOne({ username })
+
+    if (!user) {
+        return res.status(400)
+            .json(
+                new ApiResponse(400, { success: false, data: "User is not Found" }, "User Is not found")
+            )
+    }
 
     const isPasswordCorrect = await user.PassCompare(password);
 
@@ -70,7 +77,7 @@ const LoginAdmin = AsnycHandler(async (req, res) => {
 
 
     const otp = generateOTP();
-    await sendMail(user.email,"Validation otp", `your otp is ${otp}`)
+    await sendMail(user.email, "Validation otp", `your otp is ${otp}`)
 
     await EmailVerification.create({
         email: user.email,
@@ -90,6 +97,12 @@ const LoginAdmin = AsnycHandler(async (req, res) => {
 const veryfyOTPLogin = AsnycHandler(async (req, res) => {
     const { email, code } = req.body;
 
+    if (isNull([email, code])) {
+        return res.status(400)
+            .json(
+                new ApiResponse(400, { success: false, data: "Please Enter the All fields" }, "Please fill the all fields")
+            )
+    }
     const isOtpCorrect = await EmailVerification.findOne(
         {
             $and: [{ email, code }]
@@ -120,6 +133,12 @@ const veryfyOTPLogin = AsnycHandler(async (req, res) => {
         cname: user.companyName,
         email: user.email,
         phoneNo: user.mobile
+    }
+    if (!LoginUser) {
+        return res.status(400)
+            .json(
+                new ApiResponse(400, { success: false, data: "Something went wrong while fetching LoginUser" })
+            )
     }
 
     const delteEmail = await EmailVerification.findByIdAndDelete(isOtpCorrect._id)
@@ -170,7 +189,7 @@ const CreateSubAdmin = AsnycHandler(async (req, res) => {
         }
     )
 
-    if (!CreateSubAdmin) {
+    if (!CreateUser) {
         return res.status(500)
             .json(
                 new ApiResponse(500, { sucess: false }, "something went Wrong While Creating Account")
@@ -182,6 +201,13 @@ const CreateSubAdmin = AsnycHandler(async (req, res) => {
         username,
         email,
         domain
+    }
+
+    if (!user) {
+        return res.status(400)
+            .json(
+                new ApiResponse(400, { success: false, data: "Something went wrong while load data" }, "Something went wrong while load data")
+            )
     }
 
 
@@ -233,11 +259,29 @@ const AdminLogout = AsnycHandler(async (req, res) => {
 
 const ForgetPassword = AsnycHandler(async (req, res) => {
     const user = req.user;
+    const usermail = req.body;
+
+    if (!user) {
+        if (!usermail) {
+            return res.status(400)
+                .json(
+                    new ApiResponse(400, { success: false, data: "Please Enter Your mail" }, "Please Enter your mail")
+                )
+        }
+        const code = generateOTP();
+        await sendMail(usermail, "Validation otp", `your otp is ${code}`);
+        await EmailVerification.create({
+            email: usermail,
+            code: code
+        })
+        return res.status(200)
+            .json(new ApiResponse(200, { success: true }, "veryfication otp is sent on your register email"))
+    }
     const code = generateOTP();
-    await sendMail(user.email,"Validation otp", `your otp is ${code}`);
+    await sendMail(user.email, "Validation otp", `your otp is ${code}`);
     await EmailVerification.create({
-        email:user.email,
-        code:code
+        email: user.email,
+        code: code
     })
     return res.status(200)
         .json(new ApiResponse(200, { success: true }, "veryfication otp is sent on your register email"))
@@ -246,7 +290,7 @@ const ForgetPassword = AsnycHandler(async (req, res) => {
 
 
 const ChangeForgetPassword = AsnycHandler(async (req, res) => {
-    const {code , newPassword } = req.body;
+    const { code, newPassword, email } = req.body; //email send when user is not loggin
     if (!code) {
         return res.status(400).json(new ApiResponse(400, { success: false }, "OTP is required"))
     }
@@ -259,6 +303,35 @@ const ChangeForgetPassword = AsnycHandler(async (req, res) => {
 
 
     const user = req.user;
+    if (!user) {
+        if (!email) {
+            return res.status(400)
+                .json(
+                    new ApiResponse(400, { success: false, data: "Please Enter Your mail" }, "Please Enter Your mail")
+                )
+        }
+        const otpRecord = await EmailVerification.findOne({ email: email, code: code });
+
+        if (!otpRecord) {
+            return res.status(400).json(new ApiResponse(400, { success: false }, "Invalid or expired OTP"));
+        }
+        const ChangePassUser = await Admin.findOne({ email })
+        if (!ChangePassUser) {
+            return res.status(400)
+                .json(
+                    new ApiResponse(400, { success: false, data: "Something problem while fetching data" }, "Something Problem while fetching data")
+                )
+        }
+        ChangePassUser.password = newPassword;
+        await ChangePassUser.save();
+
+
+        return res.status(200)
+            .json(
+                new ApiResponse(200, { success: true }, "Your Password is SuccessFully Change")
+            )
+
+    }
     const otpRecord = await EmailVerification.findOne({ email: user.email, code: code });
 
     if (!otpRecord) {
@@ -266,18 +339,17 @@ const ChangeForgetPassword = AsnycHandler(async (req, res) => {
     }
 
 
-    if (!user) {
+    const ChangePassUser = await Admin.findById(user._id)
+
+    if (!ChangePassUser) {
         return res.status(400)
             .json(
-                new ApiResponse(400, { success: false }, "Something problem while fetching Admin Details")
+                new ApiResponse(400, { success: false, data: "Something problem while fetching data" }, "Something Problem while fetching data")
             )
     }
-
-
-    const ChangePassUser = await Admin.findById(user._id)
     ChangePassUser.password = newPassword;
-    await  ChangePassUser.save();
-    
+    await ChangePassUser.save();
+
 
     return res.status(200)
         .json(
@@ -291,119 +363,117 @@ const ChangeForgetPassword = AsnycHandler(async (req, res) => {
 //Dashboard controller
 
 
-const GetAllUser = AsnycHandler(async(req,res)=>{
+const GetAllUser = AsnycHandler(async (req, res) => {
 
-    const AllUsers =  await Users.find({})
+    const AllUsers = await Users.find({})
     res.status(200)
-    .json(
-        new ApiResponse(200,{success:true , data:AllUsers} ,"Fetched All User")
-    )
+        .json(
+            new ApiResponse(200, { success: true, data: AllUsers }, "Fetched All User")
+        )
 
 })
 
 // const GetAllBookedFlights = AsnycHandler(async(req,res)=>{})
 
-const GetAllAgents = AsnycHandler(async(req,res)=>{
+const GetAllAgents = AsnycHandler(async (req, res) => {
 
-    const UnAproveAgents = await Agent.find({aprove:false}) || null
-    const AproveAgents = await Agent.find({aprove:true}) || null
+    const UnAproveAgents = await Agent.find({ aprove: false }) || null
+    const AproveAgents = await Agent.find({ aprove: true }) || null
 
     return res.status(200)
-    .json(
-        new ApiResponse(200 , {success:true , data:{
-            UnAproveAgents,
-            AproveAgents
-        }} , "Data Fetch SuccessFully" )
-    )
+        .json(
+            new ApiResponse(200, {
+                success: true, data: {
+                    UnAproveAgents,
+                    AproveAgents
+                }
+            }, "Data Fetch SuccessFully")
+        )
 
-    
+
 })
 
-const GiveAgentAprove = AsnycHandler(async(req,res)=>{
-    const {_id} = req.body;
-    const user= req.user;
+const GiveAgentAprove = AsnycHandler(async (req, res) => {
+    const { _id } = req.body;
+    const user = req.user;
 
-    if(user.Usertype != "Admin")
-    {
+    if (user.Usertype != "Admin") {
         return res.status(400)
-        .json(new ApiResponse(400 , {success:false , data:"You Can't Aprove This request , you are not Admin"}  , "you Can't Aprove This Request Your are not Admin" ))
+            .json(new ApiResponse(400, { success: false, data: "You Can't Aprove This request , you are not Admin" }, "you Can't Aprove This Request Your are not Admin"))
     }
-    if(!_id)
-    {
+    if (!_id) {
         return res.status(400)
-        .json(new ApiResponse(400 , {success:false} , "Id is not Geted"))
+            .json(new ApiResponse(400, { success: false }, "Id is not Geted"))
     }
 
     const AgentUser = await Agent.findById(_id)
-    if(!AgentUser)
-    {
+    if (!AgentUser) {
         return res.status(400)
-        .json(
-            new ApiResponse(400 , {success:false} , "Id is wrong")
-        )
+            .json(
+                new ApiResponse(400, { success: false }, "Id is wrong")
+            )
     }
 
     AgentUser.aprove = true;
     await AgentUser.save()
     const otp = generateOTP();
-    await sendMail(AgentUser.email , "Aprove Success" , "Congrts Admin Aprove Your Request")
+    await sendMail(AgentUser.email, "Aprove Success", "Congrts Admin Aprove Your Request")
 
     return res.status(200)
-    .json(
-        new ApiResponse(200 , {success:true} , "Give Aprove")
-    )
-    
+        .json(
+            new ApiResponse(200, { success: true }, "Give Aprove")
+        )
+
 })
 
-const GetAllCp = AsnycHandler(async(req,res)=>{
+const GetAllCp = AsnycHandler(async (req, res) => {
 
-    const UnAproveCp = await Cp.find({aprove:false}) || null
-    const AproveCp= await Cp.find({aprove:true}) || null
+    const UnAproveCp = await Cp.find({ aprove: false }) || null
+    const AproveCp = await Cp.find({ aprove: true }) || null
 
     return res.status(200)
-    .json(
-        new ApiResponse(200 , {success:true , data:{
-            UnAproveCp,
-            AproveCp
-        }} , "Data Fetch SuccessFully" )
-    )
+        .json(
+            new ApiResponse(200, {
+                success: true, data: {
+                    UnAproveCp,
+                    AproveCp
+                }
+            }, "Data Fetch SuccessFully")
+        )
 
-    
+
 })
 
-const GiveCpAprove = AsnycHandler(async(req,res)=>{
-    const {_id} = req.body;
-    const user= req.user;
+const GiveCpAprove = AsnycHandler(async (req, res) => {
+    const { _id } = req.body;
+    const user = req.user;
 
-    if(user.Usertype != "Admin")
-    {
+    if (user.Usertype != "Admin") {
         return res.status(400)
-        .json(new ApiResponse(400 , {success:false , data:"You Can't Aprove This request , you are not Admin"}  , "you Can't Aprove This Request Your are not Admin" ))
+            .json(new ApiResponse(400, { success: false, data: "You Can't Aprove This request , you are not Admin" }, "you Can't Aprove This Request Your are not Admin"))
     }
-    if(!_id)
-    {
+    if (!_id) {
         return res.status(400)
-        .json(new ApiResponse(400 , {success:false} , "Id is not Geted"))
+            .json(new ApiResponse(400, { success: false }, "Id is not Geted"))
     }
 
     const CpUser = await Agent.findById(_id)
-    if(!CpUser)
-    {
+    if (!CpUser) {
         return res.status(400)
-        .json(
-            new ApiResponse(400 , {success:false} , "Id is wrong")
-        )
+            .json(
+                new ApiResponse(400, { success: false }, "Id is wrong")
+            )
     }
 
     CpUser.aprove = true;
     await CpUser.save()
-    await sendMail(CpUser.email , "Aprove Success" , "Congrts Admin Aprove Your Request")
+    await sendMail(CpUser.email, "Aprove Success", "Congrts Admin Aprove Your Request")
 
     return res.status(200)
-    .json(
-        new ApiResponse(200 , {success:true} , "Congrts Your Request Aprove From the Admin")
-    )
-    
+        .json(
+            new ApiResponse(200, { success: true }, "Congrts Your Request Aprove From the Admin")
+        )
+
 })
 
 
