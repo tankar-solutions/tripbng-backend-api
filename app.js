@@ -16,16 +16,17 @@ import { BusRoutes } from './routes/bus.routes.js';
 
 
 const app = express();
-app.use(
-	cors({
-		origin: '*',
-	})
-);
+
 app.use(morgan('dev'));
 app.use(express.json({ limit: '200mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '200mb' }));
 app.use(bodyParser.json({ limit: '200mb' }));
 app.use(cookieParser())
+app.use(
+	cors({
+		origin: '*',
+	})
+);
 
 // Routes
 app.get('/',(req,res)=>
