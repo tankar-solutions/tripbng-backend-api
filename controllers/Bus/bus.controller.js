@@ -319,7 +319,35 @@ const getCitylist = AsnycHandler(async(req,res)=>{
     return res.status(200)
     .json(new ApiResponse(200 , {success:true , data:get.data} , "citylist") )
 })
+const Citycode = AsnycHandler(async(req,res)=>{
+    const {cityName} = req.body;
 
+    if(!cityName)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false , data:"Please Enter CityName"}, "Please Enter Cityname")
+        )
+    }
+
+
+for(let i=0; i<CityCodeData.length-1; i++)
+    {
+        if(CityCodeData[i]["CityName"] == cityName)
+        {
+            
+            return  res.status(200)
+            .json(
+                new ApiResponse(200 , {success:true , data:CityCodeData[i]["CityID"]} , `code is ${CityCodeData[i]["CityID"]}`)
+            )
+        }
+    }
+return res.status(200)
+.json(
+    new ApiResponse(200 , {success:false , data:"City Code is not found"} , "City Code is not found")
+)
+
+})
 
 //Some new feture Added Sone
 
@@ -331,5 +359,6 @@ export {SearchBus,
     GetBookingDetails,
     GetBookingCancellationDetails,
     CancelBooking,
-	getCitylist
+	getCitylist,
+	Citycode
 }
