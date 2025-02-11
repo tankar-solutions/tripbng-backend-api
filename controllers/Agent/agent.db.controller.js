@@ -43,8 +43,15 @@ const GetAgentUrl = AsnycHandler(async(req ,res)=>{
         Agent = await Agent.findById(id).select("-password -aprove")
     }
 
-    return res.status(400)
-    .json(new ApiResponse(400 , {success:true , data:Agent},"Data Fetch Successfully"))
+    if(!Agent)
+    {
+        return res.status(400)
+        .json(
+             new ApiResponse(400 , {success:false , data:"Agent is not found"} , "Agent is not found")
+        )
+    }
+    return res.status(200)
+    .json(new ApiResponse(200 , {success:true , data:Agent},"Data Fetch Successfully"))
 })
 //other fetures as like as user ............
 
