@@ -4,13 +4,13 @@ import {
     CheckOtp,
     Register,
     Login,
-    LoginVrfy
+    LoginVrfy,
 } from "../controllers/Agent/agent.auth.controller.js"
 import { GetAgentProfile,
     GetAgentUrl} from "../controllers/Agent/agent.db.controller.js"
 import {UserVerify} from "../middlewares/Uservrfy.js"
-
 import { Router } from "express"
+
 
 const router = Router();
 
@@ -21,7 +21,6 @@ router.route('/register').post(Register);
 router.route('/login').post(Login);
 router.route('/loginVrfy').post(LoginVrfy)
 router.route('/getagentprofile/:id').get(UserVerify,GetAgentUrl)    
-
 
 const AgentRoutes = router;
 export default AgentRoutes

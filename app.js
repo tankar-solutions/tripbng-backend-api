@@ -12,6 +12,7 @@ import AgentRoutes from "./routes/Agent.auth.routes.js"
 import CpRoutes from "./routes/cp.auth.routes.js"
 import {Flight} from "./routes/Flight.routes.js"
 import { BusRoutes } from './routes/bus.routes.js';
+import { HotelRoutes } from './routes/hotel.routes.js';
 // import BestRouter from "./routes/bestFlight.routes.js"
 
 
@@ -42,5 +43,5 @@ app.use('/best' , Flight);
 app.use('/AgentAuth' , AgentRoutes);	
 app.use('/CpAuth' , CpRoutes);	
 app.use('/bus' , BusRoutes);
-
+app.use('/hotel' , HotelRoutes);
 export {app}

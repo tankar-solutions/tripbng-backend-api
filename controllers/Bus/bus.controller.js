@@ -3,6 +3,8 @@ import {AsnycHandler} from "../../utils/AsnycHandler.js"
 import {isNull} from "../../utils/FormCheck.js"
 import {sendPostRequest}  from "../../utils/sendRequest.js"
 import {authHeaders} from "../../middlewares/util.js"
+import {CityCodeData} from "../../static/citylist.js"
+import {BusBooking} from "../../models/BusBooking.models.js"
 
 //complete
 const SearchBus = AsnycHandler(async(req ,res)=>{
@@ -106,6 +108,7 @@ const BusSeatMap = AsnycHandler(async(req,res)=>{
 
 })
 
+//complete
 const TempBooking = AsnycHandler(async(req,res)=>{
     const sampleData ={
         "Boarding_Id":"24514",
@@ -146,12 +149,50 @@ const TempBooking = AsnycHandler(async(req,res)=>{
         "SendEmail":false,
         "SendSMS":false
     }
+
+    const data = req.body
+    if(!data)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false , data:"Please Enter All Data"} , "Please Enter All the Data")
+        )
+    }
     const Booking = await sendPostRequest('http://uat.etrav.in/BusHost/BusAPIService.svc/JSONService/Bus_TempBooking',{},
         {
         Auth_Header: authHeaders(),
-        ...req.data
+        ...data
         }
     )
+    if(!Booking)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400,{success:false , data:"Something wrong while fechting data"} , "Something wrong while fetching Data")
+        )
+    }
+
+    const StoreBooingInDb = await BusBooking.create({
+        SeatBookUserEmail:data.Passenger_Email,
+        UserType:"user",
+        SeatBookUserNumber:data.Passenger_Mobile,
+        BookingRefNo:Booking.Booking_RefNo,
+        DroppingId:data.Dropping_Id,
+        BoardingId:data.Boarding_Id,
+        TickitNumber:data.PAX_Details.Ticket_Number,
+        LadiesSeat:data.PAX_Details.Ladies_Seat,
+        SeatNumber:data.PAX_Details.Seat_Number
+
+    })
+    if(!StoreBooingInDb)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false , data:"Smething went wrong while creating a object of booking"} , "Something Problem while creating a Object of booking")
+        )
+    }
+
+
 
     return res.status(200)
     .json(
@@ -160,8 +201,7 @@ const TempBooking = AsnycHandler(async(req,res)=>{
 })
 
 //After Booking
-// Do not Add any booking Api now 
-const GetBookingDetails = AsnycHandler(async(req ,res)=>{
+const GetBookingDetails = AsnycHandler(async(req ,res)=>{   
     
     const {Booking_RefNo} = req.body;
     if(!Booking_RefNo)
@@ -309,16 +349,6 @@ const CancelBooking = AsnycHandler(async(req ,res)=>{
     )
 })
 
-const getCitylist = AsnycHandler(async(req,res)=>{
-    const get = await sendPostRequest('http://uat.etrav.in/BusHost/BusAPIService.svc/JSONService/Bus_CityList' , {} , {
-        Auth_Header: authHeaders(),
-
-
-
-    })
-    return res.status(200)
-    .json(new ApiResponse(200 , {success:true , data:get.data} , "citylist") )
-})
 const Citycode = AsnycHandler(async(req,res)=>{
     const {cityName} = req.body;
 
@@ -349,16 +379,27 @@ return res.status(200)
 
 })
 
+const getCitylist = AsnycHandler(async(req,res)=>{
+    const get = await sendPostRequest('http://uat.etrav.in/BusHost/BusAPIService.svc/JSONService/Bus_CityList' , {} , {
+        Auth_Header: authHeaders(),
+
+
+
+    })
+    return res.status(200)
+    .json(new ApiResponse(200 , {success:true , data:get.data} , "citylist") )
+})
 //Some new feture Added Sone
 
 
 
-export {SearchBus,
+export {
+    SearchBus,
     BusSeatMap,
     TempBooking,
     GetBookingDetails,
     GetBookingCancellationDetails,
     CancelBooking,
-	getCitylist,
-	Citycode
+    getCitylist,
+    Citycode
 }

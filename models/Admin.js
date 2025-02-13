@@ -63,6 +63,7 @@ adminSchema.methods.GenrateAccessTocken = function()
     {
       _id:this._id,
       username:this.username,
+      
       email:this.email,
       type:this.Usertype
 

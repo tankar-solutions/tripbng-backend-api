@@ -309,5 +309,6 @@ export {
     CheckOtp,
     Register,
     Login,
-    LoginVrfy
+    LoginVrfy,
+    // GetAgentprofile
 }
