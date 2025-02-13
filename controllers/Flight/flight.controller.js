@@ -7,7 +7,6 @@ import { sendGetRequest, sendPostRequest } from "../../utils/sendRequest.js";
 import { isNull } from "../../utils/FormCheck.js"
 import { authHeaders } from "../../middlewares/util.js";
 import AirlineCodes from "../../models/AirlineCodes.js"
-import { searchError } from "wikipedia";
 
 
 
