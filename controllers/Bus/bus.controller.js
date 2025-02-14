@@ -172,27 +172,7 @@ const TempBooking = AsnycHandler(async(req,res)=>{
         )
     }
 
-    const StoreBooingInDb = await BusBooking.create({
-        SeatBookUserEmail:data.Passenger_Email,
-        UserType:"user",
-        SeatBookUserNumber:data.Passenger_Mobile,
-        BookingRefNo:Booking.Booking_RefNo,
-        DroppingId:data.Dropping_Id,
-        BoardingId:data.Boarding_Id,
-        TickitNumber:data.PAX_Details.Ticket_Number,
-        LadiesSeat:data.PAX_Details.Ladies_Seat,
-        SeatNumber:data.PAX_Details.Seat_Number
-
-    })
-    if(!StoreBooingInDb)
-    {
-        return res.status(400)
-        .json(
-            new ApiResponse(400 , {success:false , data:"Smething went wrong while creating a object of booking"} , "Something Problem while creating a Object of booking")
-        )
-    }
-
-
+   
 
     return res.status(200)
     .json(
