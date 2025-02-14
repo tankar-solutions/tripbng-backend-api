@@ -176,7 +176,7 @@ const TempBooking = AsnycHandler(async(req,res)=>{
 
     return res.status(200)
     .json(
-        new ApiResponse(200 ,{success:true , data:Booking} ,"FetchSuccessFully")
+        new ApiResponse(200 ,{success:true , data:Booking.data} ,"FetchSuccessFully")
     )
 })
 
