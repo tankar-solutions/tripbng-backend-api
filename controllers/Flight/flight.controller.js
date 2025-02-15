@@ -349,26 +349,14 @@ const FlightBooking = AsnycHandler(async (req, res) => {
 
 })
 
+const GetBookingDetails = AsnycHandler(async(req,res)=>{
+     
+      
+
+})
 
 
-const SimpleData = {
-    mobile_number: "",
-    email: "",
-    pax_details: [{}],
-    GstDetails: {
-        is_gst: true, //true/false,
-        gst_number: "", //"number"
-        gst_holder_name: "",
-        address: "",
 
-    },
-    amount: "",
-    search_key: "",
-    flight_key: "",
-    ssr_key: "",
-    booking_remark: "",
-
-}
 
 
 
