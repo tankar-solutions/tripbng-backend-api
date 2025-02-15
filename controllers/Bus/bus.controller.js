@@ -164,6 +164,7 @@ const TempBooking = AsnycHandler(async(req,res)=>{
         ...data
         }
     )
+    console.log(Booking)
     if(!Booking)
     {
         return res.status(400)

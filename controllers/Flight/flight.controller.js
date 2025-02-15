@@ -7,7 +7,7 @@ import { sendGetRequest, sendPostRequest } from "../../utils/sendRequest.js";
 import { isNull } from "../../utils/FormCheck.js"
 import { authHeaders } from "../../middlewares/util.js";
 import AirlineCodes from "../../models/AirlineCodes.js"
-
+import { Api1BookingConverter, Api2BookingConverter } from "../../utils/FlightBookingwrapper/BookingWraaper.js";
 
 
 const head = {
@@ -127,7 +127,6 @@ const GetAirlinePolicy = AsnycHandler(async (req, res) => {
 })
 
 
-
 const sampleData = {
     "Search_Key": "",
     "Flight_Keys": [""
@@ -149,7 +148,6 @@ const sampleData = {
         }
     ]
 }
-
 
 //Getseat
 const GetFlightSeat = AsnycHandler(async (req, res) => {
@@ -222,15 +220,14 @@ const GetFlightSeat = AsnycHandler(async (req, res) => {
 })
 
 //Flight ssr
-const GetFlightSSR = AsnycHandler(async(req,res)=>{
-    const {ApiNo , Search_Key,Flight_Key} = req.body;
+const GetFlightSSR = AsnycHandler(async (req, res) => {
+    const { ApiNo, Search_Key, Flight_Key } = req.body;
 
-    if(ApiNo == "1")
-    {
-        const SSRDetails = await sendPostRequest('' , { },{
+    if (ApiNo == "1") {
+        const SSRDetails = await sendPostRequest('', {}, {
             Auth_Header: authHeaders(),
             Search_Key,
-            AirSSRRequestDetails:[
+            AirSSRRequestDetails: [
                 {
                     Flight_Key
                 }
@@ -238,33 +235,40 @@ const GetFlightSSR = AsnycHandler(async(req,res)=>{
 
         })
 
-        if(!SSRDetails)
-        {
+        if (!SSRDetails) {
             return res.status(400)
-            .json(
-                new ApiResponse(400 , {success:false , data:"Did't fetch SSRdetails"} ,"Did't fetch SSrdeatils")
-            )
+                .json(
+                    new ApiResponse(400, { success: false, data: "Did't fetch SSRdetails" }, "Did't fetch SSrdeatils")
+                )
         }
 
         return res.status(200)
-        .json(
-            new ApiResponse(200 , {success:true , data:SSRDetails} , "Successfully fetched")
-        )
+            .json(
+                new ApiResponse(200, { success: true, data: SSRDetails }, "Successfully fetched")
+            )
     }
-    if(ApiNo == "2")
-    {
+    if (ApiNo == "2") {
         return res.status(200)
-        .json(
-            new ApiResponse(200 , {success:false , data:"SSR details is not avalbl"} , "SSR details is not avalbl")
-        )
+            .json(
+                new ApiResponse(200, { success: false, data: "SSR details is not avalbl" }, "SSR details is not avalbl")
+            )
     }
 })
 
-//Flight Booking->
+//Flight Booking
 const FlightBooking = AsnycHandler(async (req, res) => {
-    const { ApiNo , Api1Data , Api2Data } = req.body;
+    const  body  = req.body;
+//    console.log(body)
+    if (!body) {
+        return res.status(400)
+            .json(
+                new ApiResponse(400, { success: false, data: "Please enter All the Data" }, "please enter the data")
+            )
+    }
 
-    if (!ApiNo) {
+
+
+    if (!body.ApiNo) {
         return res.status(400)
             .json(
                 new ApiResponse(400, { success: false, data: "please Enter Apino" }, "please Enter Apino")
@@ -272,89 +276,73 @@ const FlightBooking = AsnycHandler(async (req, res) => {
             )
     }
 
-    const Api1SampleData = {
-        "Customer_Mobile": "6789828347",
-        "Passenger_Mobile": "6789828347",
-        "Passenger_Email": "demo@outlook.com",
-        "PAX_Details": [
-            {
-                "Pax_Id": 1,
-                "Pax_type": 0,
-                "Title": "Mr",
-                "First_Name": "Testing",
-                "Last_Name": "Sample",
-                "Gender": 0,
-                "Age": null,
-                "DOB": null,
-                "Passport_Number": null,
-                "Passport_Issuing_Country": null,
-                "Passport_Expiry": null,
-                "Nationality": null,
-                "Pancard_Number": null,
-                "FrequentFlyerDetails": null
-            }
-        ],
-        "GST": false,
-        "GST_Number": "",
-        "GST_HolderName": "GST Holder Name",
-        "GST_Address": "GST Address",
-        "BookingFlightDetails": [
-            {
-                "Search_Key": "",                  
-                "Flight_Key":"",
-                "BookingSSRDetails": [
-                    {
-                        "SSR_Key": ""
-                    }
-                ]
-            }
-        ],
-        "BookingRemark": "MAA-TCR  18-Oct-2021  Test API With GST"
-    }
-    if (ApiNo == "1") {
-        
 
-        if(!Api1Data)
-        {
-            return res.status(400)
-            .json(
-                new ApiResponse(400 , {success:false , data:"Please Enter All the field"} , "Please Enter All the Field")
-            )
-        }
 
-        const { data } = await axios.post(
-			`${process.env.ETRAV_BASEURL}/airlinehost/AirAPIService.svc/JSONService/Air_TempBooking`,
-			{
-				Auth_Header: authHeaders(),
-				...Api1Data,
-			}
-		);
+    if (body.ApiNo == "1") {
 
-        if(!data)
-        {
+
+        const FormateApi1Data = Api1BookingConverter(body);
+
+
+        console.log(FormateApi1Data)
+       
+        const {data} = await sendPostRequest(`${process.env.ETRAV_BASEURL}/airlinehost/AirAPIService.svc/JSONService/Air_TempBooking`,{},{
+            
+                Auth_Header: authHeaders(),
+                ...FormateApi1Data,
+            
+        })
+
+        if (!data) {
             return res.status(500)
-            .json(
-                new ApiResponse(500 , {success:false ,data:"Something went wrong while booking flight" } , "Something went wrong while booking flight")
-            )
+                .json(
+                    new ApiResponse(500, { success: false, data: "Something went wrong while booking flight" }, "Something went wrong while booking flight")
+                )
         }
 
 
         return res.status(200)
-        .json(
-            new ApiResponse(200 , {success:true , data},"Success")
-        )
-    }
-    else if (ApiNo == "2") {
-          
-        if(!Api2Data)
-        {
-            return res.status(400)
             .json(
-                new ApiResponse(400 , {success:false , data:"Please Enter Data of Api2"} , "Please Enter Data Api2")
+                new ApiResponse(200, { success: true, data }, "Success")
             )
+    }
+    else if (body.ApiNo == "2") {
+
+        const FormateApi2Data = Api2BookingConverter(body)
+
+        if (!FormateApi2Data.Id) {
+            return res.status(400)
+                .json(
+                    new ApiResponse(400, { success: false, data: "Please Enter the Id" }, "Please Ebter the Id")
+                )
         }
-        
-        const {data} = await sendPostRequest('' ,{},{})
+
+        const BookingId = await GetBookingId(FormateApi2Data.Id)
+
+        if (!BookingId) {
+            return res.status(400)
+                .json(
+                    new ApiResponse(400, { success: false, data: "Something be poblem with the Booking Id" }, "Something be Problem with the booking id")
+                )
+        }
+
+        FormateApi2Data.bookingId = BookingId
+
+        // console.log(FormateApi2Data)
+
+        const  data  = await sendPostRequest('https://apitest.tripjack.com/oms/v1/air/book', head, FormateApi2Data)
+        // console.log("data is",data)
+        if (!data) {
+            return res.status(400)
+                .json(
+                    new ApiResponse(400, { success: false, data: "Something went wrong while booking" }, "Something went wrong while booking")
+                )
+        }
+
+        return res.status(200)
+            .json(
+                new ApiResponse(200, { success: true, data:data.data }, "Booking Done")
+            )
 
     }
 
@@ -363,11 +351,39 @@ const FlightBooking = AsnycHandler(async (req, res) => {
 
 
 
+const SimpleData = {
+    mobile_number: "",
+    email: "",
+    pax_details: [{}],
+    GstDetails: {
+        is_gst: true, //true/false,
+        gst_number: "", //"number"
+        gst_holder_name: "",
+        address: "",
+
+    },
+    amount: "",
+    search_key: "",
+    flight_key: "",
+    ssr_key: "",
+    booking_remark: "",
+
+}
+
+
+
+
+
+
+
+
+
 
 export {
-    GetAllBestFlight,
-    SearchAirLine,
-    GetAirlinePolicy,
-    GetFlightSeat,
-    GetFlightSSR
+    GetAllBestFlight, //complete
+    SearchAirLine, //complete
+    GetAirlinePolicy, //complete
+    GetFlightSeat, //complete
+    GetFlightSSR, //complete
+    FlightBooking
 }

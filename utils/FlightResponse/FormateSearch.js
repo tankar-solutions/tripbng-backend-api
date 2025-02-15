@@ -119,7 +119,7 @@ function ResponseAdder(Data1 , searchkey=null , Data2)
                 Data1[i].Airline_Code  ,
                 Data1[i].Segments[0].Flight_Number ,
                 Data1[i].Segments[0].Duration , Destination , 
-                 "Pricing 2",//Origin , Data1[i].TravelDate , Data1[i].Fares[0] ,
+                Data1[i].Fares[0].FareDetails,//Origin , Data1[i].TravelDate , Data1[i].Fares[0] ,
                   new ADDT1(null) , 
                   new ADDT2(
                     Data1[i].Fares.Fare_Id ,
@@ -161,7 +161,7 @@ function ResponseAdder(Data1 , searchkey=null , Data2)
                 Destination,
                 Origin,
                 null,
-                "Data2 Pricing",
+                Data2[i].totalPriceList[0],
                 new ADDT1(null),
                 new ADDT2(null,null,null,null,null,
                     Data2[i].sI[0].fD.eT,

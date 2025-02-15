@@ -47,9 +47,16 @@ const GetSubAdminProfile = AsnycHandler(async(req ,res)=>{
     {
        
     }
-    if(user.domain == "")
+    if(user.domain == "flight")
+    {
+        
+    }
+    else if(user.domain == "hotel")
     {}
-    else if(user.domain == "")
+    else if(user.domain == "bus")
     {}
+    else if(user.domain=="holidays")
+    {}
+
 
 })
