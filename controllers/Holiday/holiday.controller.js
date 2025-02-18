@@ -1,6 +1,6 @@
-import Package from "../../models/Package";
-import { AsnycHandler } from "../utils/AsnycHandler.js"
-import { ApiResponse } from "../utils/ApiResponse.js"
+import  Package  from "../../models/Package.js";
+import { AsnycHandler } from "../../utils/AsnycHandler.js"
+import { ApiResponse } from "../../utils/ApiResponse.js"
 import { isNull } from "../../utils/FormCheck.js"
 import {userPackage} from "../../models/UserPackage.js"
 
@@ -75,15 +75,15 @@ const createPackages = AsnycHandler(async(req,res)=>{
         )
     }
 
-    const SendEmailToDMC = await CreateNewPackages.info("request for travel page" , CreateNewPackages);
+    // const SendEmailToDMC = await CreateNewPackages.info("request for travel page" , CreateNewPackages);
 
-    if(!SendEmailToDMC)
-    {
-        return res.status(400)
-        .json(
-            new ApiResponse(400 , {success:false , data:"We Can't Create a contect with DMCs"},"We Can't Create a contect with DMC's Please Try Again")
-        )
-    }
+    // if(!SendEmailToDMC)
+    // {
+    //     return res.status(400)
+    //     .json(
+    //         new ApiResponse(400 , {success:false , data:"We Can't Create a contect with DMCs"},"We Can't Create a contect with DMC's Please Try Again")
+    //     )
+    // }
 
 
     return res.status(200)
@@ -96,5 +96,5 @@ const createPackages = AsnycHandler(async(req,res)=>{
 
 export 
 {
-    createPackages 
+    createPackages
 }

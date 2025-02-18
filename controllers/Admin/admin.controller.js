@@ -476,6 +476,42 @@ const GiveCpAprove = AsnycHandler(async (req, res) => {
 
 })
 
+const BlockCp = AsnycHandler(async(req,res)=>{
+    const id =  req.parms.id;
+
+    const BlockCp = await Cp.findByIdAndDelete({_id:id});
+    if(!BlockCp)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400  , {success:false , data:"Please send correct id"} , "Please Send Correct Id")
+        )
+    }
+    return res.status(200)
+    .json(
+        new ApiResponse(200,{success:true , data:"User is Deleted"} , "User is Deleted")
+    )
+    
+    
+})
+
+const BlockAgent = AsnycHandler(async(req,res)=>{
+    const id =  req.parms.id;
+
+    const BlockedAgent = await Agent.findByIdAndDelete({_id:id});
+    if(!BlockedAgent)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400  , {success:false , data:"Please send correct id"} , "Please Send Correct Id")
+        )
+    }
+    return res.status(200)
+    .json(
+        new ApiResponse(200,{success:true , data:"User is Deleted"} , "User is Deleted")
+    )
+})
+
 
 
 export {
