@@ -4,9 +4,9 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import User from '../models/Users.js';
 import { errorMessage, successMessage } from '../middlewares/util.js';
-import { generateOTP } from "../../utils/generateOtp.js"
-import { sendSMS } from "../../utils/SMS.js"
-import {OtpVfy} from "../../models/Agent_Cp/OtpVfy.models.js"
+import { generateOTP } from "../utils/generateOtp.js"
+import { sendSMS } from "../utils/SMS.js"
+import {OtpVfy} from "../models/Agent_Cp/OtpVfy.models.js"
 import { ApiResponse } from '../utils/ApiResponse.js';
 
 
