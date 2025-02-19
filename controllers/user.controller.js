@@ -10,8 +10,8 @@ import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import s3Client from '../middlewares/s3Client.js';
 import Countries from '../models/Countries.js';
-import { AsnycHandler } from "../../utils/AsnycHandler.js"
-import { ApiResponse } from "../../utils/ApiResponse.js"
+import { AsnycHandler } from "../utils/AsnycHandler.js"
+import { ApiResponse } from "../utils/ApiResponse.js"
 
 dotenv.config();
 
