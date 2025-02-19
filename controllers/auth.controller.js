@@ -28,7 +28,14 @@ const login = async (req, res) => {
 		}
 
 		const otp = generateOTP();
-		await sendSMS(`opt is ${otp}` , mobile)
+		const otpsender = await sendSMS(`opt is ${otp}` , mobile)
+		if(!otpsender)
+		{
+			return res.status(400)
+			.json(
+				new ApiResponse(400 , {success:false , data:"something issue in sedning otp"} , "something issue in sending otp")
+			)
+		}
 
 
 		// const number = `91${mobile}`;
