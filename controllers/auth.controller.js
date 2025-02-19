@@ -6,6 +6,8 @@ import User from '../models/Users.js';
 import { errorMessage, successMessage } from '../middlewares/util.js';
 import { generateOTP } from "../../utils/generateOtp.js"
 import { sendSMS } from "../../utils/SMS.js"
+import {OtpVfy} from "../../models/Agent_Cp/OtpVfy.models.js"
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 
 const login = async (req, res) => {
@@ -27,6 +29,7 @@ const login = async (req, res) => {
 		const otp = generateOTP();
 		await sendSMS(`opt is ${otp}` , mobile)
 
+
 		// const number = `91${mobile}`;
 
 		// await axios.post(
@@ -40,6 +43,17 @@ const login = async (req, res) => {
 		// 		},
 		// 	}
 		// );
+		const object = await OtpVfy.create({
+			veryficationType:"login",
+			veryficationFeild:mobile,
+			otp:otp
+		})
+		if(!object)
+		{
+			return res.status(400)
+			.json(errorMessage("something wrong while creating login"))
+		}
+
 
 		return res.status(200).json(successMessage('OTP Sent Successfully'));
 	} catch (err) {
@@ -67,12 +81,19 @@ const verifyOTP = async (req, res) => {
 				.json(errorMessage('No account exists with this number.'));
 		}
 
-		if (mobile === '9998881234') {
-			const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-			return res
-				.status(200)
-				.json(successMessage('OTP Verified', { token, user }));
-		}
+		  const isVerificationExist = await OtpVfy.findOne({
+				veryficationType: 'login',
+				veryficationfield: mobile,
+				otp: otp
+			});
+			if(!isVerificationExist)
+			{
+				return res.status(400)
+				.json(
+					new ApiResponse(400 , {success:false , data:"Please Enter Correct otp"} , "Please Enter Correct otp")
+				)
+			}
+		
 
 		// const number = `91${mobile}`;
 
