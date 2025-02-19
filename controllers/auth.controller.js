@@ -4,6 +4,9 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import User from '../models/Users.js';
 import { errorMessage, successMessage } from '../middlewares/util.js';
+import { generateOTP } from "../../utils/generateOtp.js"
+import { sendSMS } from "../../utils/SMS.js"
+
 
 const login = async (req, res) => {
 	try {
@@ -21,9 +24,8 @@ const login = async (req, res) => {
 			user = await User.create({ mobile: mobile });
 		}
 
-		if (mobile === '9998881234') {
-			return res.status(200).json(successMessage('OTP Sent Successfully'));
-		}
+		const otp = generateOTP();
+		await sendSMS(`opt is ${otp}` , mobile)
 
 		// const number = `91${mobile}`;
 

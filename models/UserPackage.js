@@ -48,6 +48,10 @@ const userPackageSchema = new mongoose.Schema({
 //     }
 //     return "done"
 // }
+// userPackageSchema.post('save' , async(subject , context)=>{
+//     const AllDmcMember = await DMC.find({})
+
+// })
 
 
 export const userPackage = mongoose.model("userPackage", userPackageSchema);
