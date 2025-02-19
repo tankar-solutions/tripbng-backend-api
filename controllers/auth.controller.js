@@ -3,192 +3,122 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import User from '../models/Users.js';
-import { errorMessage, successMessage } from '../middlewares/util.js';
-import { generateOTP } from "../utils/generateOtp.js"
-import { sendSMS } from "../utils/SMS.js"
-import {OtpVfy} from "../models/Agent_Cp/OtpVfy.models.js"
+import { generateOTP } from "../utils/generateOtp.js";
+import { sendSMS } from "../utils/SMS.js";
+import { OtpVfy } from "../models/Agent_Cp/OtpVfy.models.js";
 import { ApiResponse } from '../utils/ApiResponse.js';
-import { AsnycHandler } from "../utils/AsnycHandler.js"
+import { AsnycHandler } from "../utils/AsnycHandler.js";
 
+const login = AsnycHandler(async (req, res) => {
+    const { mobile } = req.body;
 
-const login = async (req, res) => {
-	try {
-		const { mobile } = req.body;
+    if (!mobile) {
+        return res.status(400).json(new ApiResponse(400, null, "Valid mobile number required"));
+    }
 
-		if (!mobile) {
-			return res
-				.status(400)
-				.json(errorMessage('Please enter the valid mobile.'));
-		}
+    let user = await User.findOne({ mobile });
+    if (!user) {
+        user = await User.create({ mobile });
+    }
 
-		let user = await User.findOne({ mobile: mobile });
+    const otp = generateOTP();
+    try {
+        await sendSMS(`Your OTP is ${otp}`, mobile);
+    } catch (err) {
+        return res.status(500).json(new ApiResponse(500, null, "Failed to send OTP"));
+    }
 
-		if (!user) {
-			user = await User.create({ mobile: mobile });
-		}
+    const otpRecord = await OtpVfy.create({
+        veryficationType: "login",
+        veryficationFeild: mobile,
+        otp
+    });
 
-		const otp = generateOTP();
-		const otpsender = await sendSMS(`opt is ${otp}` , mobile)
-		if(!otpsender)
-		{
-			return res.status(400)
-			.json(
-				new ApiResponse(400 , {success:false , data:"something issue in sedning otp"} , "something issue in sending otp")
-			)
-		}
+    if (!otpRecord) {
+        return res.status(500).json(new ApiResponse(500, null, "Failed to create OTP record"));
+    }
 
+    return res.status(200).json(new ApiResponse(200, null, "OTP sent successfully"));
+});
 
-		// const number = `91${mobile}`;
+const verifyOTP = AsnycHandler(async (req, res) => {
+    const { mobile, otp } = req.body;
 
-		// await axios.post(
-		// 	`https://control.msg91.com/api/v5/otp?template_id=64f0546cd6fc0564cc6ff353&mobile=${number}`,
-		// 	{},
-		// 	{
-		// 		headers: {
-		// 			accept: 'application/json',
-		// 			'Content-Type': 'application/json',
-		// 			authkey: process.env.MSG_AUTH_KEY,
-		// 		},
-		// 	}
-		// );
-		const object = await OtpVfy.create({
-			veryficationType:"login",
-			veryficationFeild:mobile,
-			otp:otp
-		})
-		if(!object)
-		{
-			return res.status(400)
-			.json(errorMessage("something wrong while creating login"))
-		}
+    if (!mobile || !otp) {
+        return res.status(400).json(new ApiResponse(400, null, "Mobile and OTP required"));
+    }
 
+    const user = await User.findOne({ mobile });
+    if (!user) {
+        return res.status(404).json(new ApiResponse(404, null, "User not found"));
+    }
 
-		return res.status(200).json(successMessage('OTP Sent Successfully'));
-	} catch (err) {
-		return res
-			.status(500)
-			.json(errorMessage(err?.message || 'Something went wrong'));
-	}
-};
+    const otpRecord = await OtpVfy.findOne({
+		veryficationType: "login",
+        veryficationFeild: mobile,
+        otp
+    });
 
-const verifyOTP = async (req, res) => {
-	try {
-		const { mobile, otp } = req.body;
+    if (!otpRecord) {
+        return res.status(400).json(new ApiResponse(400, null, "Invalid OTP"));
+    }
 
-		if (!mobile) {
-			return res
-				.status(400)
-				.json(errorMessage('Please enter the valid number.'));
-		}
+    // Check OTP expiration (5 minutes)
+    if (Date.now() - otpRecord.createdAt > 300000) {
+        await OtpVfy.deleteOne({ _id: otpRecord._id });
+        return res.status(401).json(new ApiResponse(401, null, "OTP expired"));
+    }
 
-		let user = await User.findOne({ mobile: mobile });
+    // Cleanup OTP record
+    await OtpVfy.deleteOne({ _id: otpRecord._id });
 
-		if (!user) {
-			return res
-				.status(400)
-				.json(errorMessage('No account exists with this number.'));
-		}
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    return res.status(200).json(new ApiResponse(200, { token, user }, "OTP verified successfully"));
+});
 
-		  const isVerificationExist = await OtpVfy.findOne({
-				veryficationType: 'login',
-				veryficationfield: mobile,
-				otp: otp
-			});
-			if(!isVerificationExist)
-			{
-				return res.status(400)
-				.json(
-					new ApiResponse(400 , {success:false , data:"Please Enter Correct otp"} , "Please Enter Correct otp")
-				)
-			}
-		
+const resendOTP = AsnycHandler(async (req, res) => {
+    const { mobile } = req.body;
 
-		// const number = `91${mobile}`;
+    if (!mobile) {
+        return res.status(400).json(new ApiResponse(400, null, "Valid mobile number required"));
+    }
 
-		// const result = await axios.get(
-		// 	`https://control.msg91.com/api/v5/otp/verify?otp=${otp}&mobile=${number}`,
-		// 	{
-		// 		headers: {
-		// 			authkey: process.env.MSG_AUTH_KEY,
-		// 		},
-		// 	}
-		// );
+    const otp = generateOTP();
+    try {
+        await sendSMS(`Your new OTP is ${otp}`, mobile);
+    } catch (err) {
+        return res.status(500).json(new ApiResponse(500, null, "Failed to resend OTP"));
+    }
 
-		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-		return res
-			.status(200)
-			.json(successMessage('OTP Verified', { token, user }));
-	} catch (err) {
-		return res
-			.status(500)
-			.json(errorMessage(err?.message || 'Something went wrong'));
-	}
-};
+    // Update existing OTP record
+    await OtpVfy.findOneAndUpdate(
+        { verificationField: mobile, verificationType: "login" },
+        { otp, createdAt: Date.now() },
+        { upsert: true }
+    );
 
-const resendOTP = async (req, res) => {
-	try {
-		const { mobile } = req.body;
+    return res.status(200).json(new ApiResponse(200, null, "OTP resent successfully"));
+});
 
-		if (!mobile) {
-			return res
-				.status(400)
-				.json(errorMessage('Please enter the valid number.'));
-		}
+const socialLogin = AsnycHandler(async (req, res) => {
+    const { email, name, provider } = req.body;
 
-		// const number = `91${mobile}`;
+    if (!provider || !email || !name) {
+        return res.status(400).json(new ApiResponse(400, null, "Provider, email, and name are required"));
+    }
 
-		// const result = await axios.get(
-		// 	`https://control.msg91.com/api/v5/otp/retry?retrytype=text&authkey=${process.env.MSG_AUTH_KEY}&mobile=${number}`,
-		// 	{
-		// 		headers: {
-		// 			authkey: process.env.MSG_AUTH_KEY,
-		// 		},
-		// 	}
-		// );
+    let user = await User.findOne({ email, provider });
+    if (!user) {
+        user = await User.create({ email, name, provider });
+    }
 
-		return res.status(200).json(successMessage('OTP Sent Successfully'));
-	} catch (err) {
-		return res
-			.status(500)
-			.json(errorMessage(err?.message || 'Something went wrong'));
-	}
-};
-
-const socialLogin = async (req, res) => {
-	try {
-		const { email, name, provider } = req.body;
-
-		if (!provider) {
-			return res.status(400).json(errorMessage('Provider is missing.'));
-		}
-		if (!email || !name) {
-			return res.status(400).json(errorMessage('Email & Name is missing.'));
-		}
-
-		let user = await User.findOne({ email: email, provider: provider });
-
-		if (!user) {
-			user = await User.create({
-				email: email,
-				name: name,
-				provider: provider,
-			});
-		}
-
-		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-		return res
-			.status(200)
-			.json(successMessage('Login Successfully', { token, user }));
-	} catch (err) {
-		return res
-			.status(500)
-			.json(errorMessage(err?.message || 'Something went wrong'));
-	}
-};
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    return res.status(200).json(new ApiResponse(200, { token, user }, "Social login successful"));
+});
 
 export default {
-	login,
-	verifyOTP,
-	resendOTP,
-	socialLogin,
+    login,
+    verifyOTP,
+    resendOTP,
+    socialLogin
 };
