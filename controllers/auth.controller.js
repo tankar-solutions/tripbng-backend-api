@@ -116,9 +116,75 @@ const socialLogin = AsnycHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, { token, user }, "Social login successful"));
 });
 
+
+
+// Add these functions in auth.controller.js
+
+const disableAccount = AsnycHandler(async (req, res) => {
+    const { password } = req.body;
+    const userId = req.user.id; // Assuming authentication middleware sets req.user
+
+    if (!password) {
+        return res.status(400).json(new ApiResponse(400, null, "Password is required"));
+    }
+
+    const user = await User.findById(userId).select("+password"); // Ensure password field is selected
+    if (!user) {
+        return res.status(404).json(new ApiResponse(404, null, "User not found"));
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+        return res.status(401).json(new ApiResponse(401, null, "Invalid password"));
+    }
+
+    user.isActive = false; // Assuming User model has an isActive field
+    await user.save();
+
+    return res.status(200).json(new ApiResponse(200, { reactivationLink: "http://example.com/reactivate" }, "Account disabled successfully"));
+});
+
+const deleteAccountLink = AsnycHandler(async (req, res) => {
+    const { password } = req.body;
+    const userId = req.user.id;
+
+    if (!password) {
+        return res.status(400).json(new ApiResponse(400, null, "Password is required"));
+    }
+
+    const user = await User.findById(userId).select("+password");
+    if (!user) {
+        return res.status(404).json(new ApiResponse(404, null, "User not found"));
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+        return res.status(401).json(new ApiResponse(401, null, "Invalid password"));
+    }
+
+    // await User.deleteOne({ _id: userId });
+    const link  = 'www.google.com'
+    return res.status(200).json(new ApiResponse(200, {success:true ,data:`To delete the Account click this link ${link}` }, `To delete the Account click this link ${link}`));
+});
+
+const deleteAccount =  AsnycHandler(async(req,res)=>{
+    const userId = req.user.id;
+    await User.deleteOne({ _id: userId });
+    return res.status(200,{success:true , data:"Account Deleted SuccessFully"},"Account Deleted SuccessFully")
+
+})
+
+// Update the export at the end
 export default {
     login,
     verifyOTP,
     resendOTP,
-    socialLogin
+    socialLogin,
+    disableAccount,
+    deleteAccountLink,
+    deleteAccount
 };
+
+
+
+

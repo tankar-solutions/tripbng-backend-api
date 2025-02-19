@@ -20,7 +20,9 @@ router.route('/login').post(AuthController.login);
 router.route('/verify').post(AuthController.verifyOTP);
 router.route('/resend').post(AuthController.resendOTP);
 router.route('/socialLogin').post(AuthController.socialLogin);
-
+router.route('/disableaccount').post(AuthController.disableAccount);
+router.route('/deleteaccountlink').post(AuthController.deleteAccountLink);
+router.route('/deteleaccount').post(AuthController.deleteAccount);
 router.route('/presignedurl').post(UserController.getPreSignedUrl);
 
 router

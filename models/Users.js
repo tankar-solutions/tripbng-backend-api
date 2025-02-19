@@ -30,6 +30,10 @@ const usersSchema = new mongoose.Schema(
 		Usertype:{
 		  type:String,
 		  default:"User"	
+		},
+		isActive:{
+			type:Boolean,
+			default:true,
 		}
 	},
 	{ timestamps: true }
