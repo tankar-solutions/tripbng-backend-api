@@ -77,9 +77,9 @@ const verifyOTP = AsnycHandler(async (req, res) => {
     // Cleanup OTP record
     await OtpVfy.deleteOne({ _id: otpRecord._id });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id ,type:'User' }, process.env.JWT_SECRET);
     return res
-    .cookie("accessToken", token, options)
+    .cookie("AccessToken", token, options)
     .status(200).
     json(new ApiResponse(200, { token, user }, "OTP verified successfully"));
 });
@@ -153,6 +153,7 @@ const disableAccount = AsnycHandler(async (req, res) => {
 });
 
 const deleteAccountOtpsend = AsnycHandler(async (req, res) => {
+    console.log('user is' , req.user)
     const mobile = req.user.mobile
 
    

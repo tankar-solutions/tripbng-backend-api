@@ -29,13 +29,19 @@ export const UserVerify = async (req,res,next)=>
         )
     }
 
+    console.log("type is " , Decodeduser.type)
+    if(!Decodeduser.type)
+    {
+        return "Usertype is not define"
+        
+    }
     if(Decodeduser.type == "Admin")
     {
 
      user = await Admin.findById(Decodeduser._id).select("-password")
     }
     else  if(Decodeduser.type == "User"){
-     user = await Users.findById(Decodeduser._id).select("-password")
+     user = await Users.findById(Decodeduser.id)
           
     }
     else if(Decodeduser.type == "Agent")
