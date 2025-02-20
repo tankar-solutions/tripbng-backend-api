@@ -9,6 +9,11 @@ import { OtpVfy } from "../models/Agent_Cp/OtpVfy.models.js";
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { AsnycHandler } from "../utils/AsnycHandler.js";
 
+
+const options = {
+    httpOnly: true,
+    secure: true
+};
 const login = AsnycHandler(async (req, res) => {
     const { mobile } = req.body;
 
@@ -73,7 +78,10 @@ const verifyOTP = AsnycHandler(async (req, res) => {
     await OtpVfy.deleteOne({ _id: otpRecord._id });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    return res.status(200).json(new ApiResponse(200, { token, user }, "OTP verified successfully"));
+    return res
+    .cookie("accessToken", token, options)
+    .status(200).
+    json(new ApiResponse(200, { token, user }, "OTP verified successfully"));
 });
 
 const resendOTP = AsnycHandler(async (req, res) => {
@@ -185,59 +193,37 @@ const deleteAccountOtpsend = AsnycHandler(async (req, res) => {
 
 const vrfyOtpForDelet = AsnycHandler(async(req,res)=>{
     const {otp} = req.body;
-    const mobile = req.user.mobile
+    const mobile = req.user.mobile;
 
-    if(!mobile)
-    {
-        return res.status(400)
-        .json(
-            new ApiResponse(400 , {success:false , data:"mobile number is not found"} , "mobile number is not found")
-
-        )
-    }
-    if(!otp)
-    {
-        return res.status(200)
-        .json(
-            new ApiResponse(200 , {success:true , data:"please Enter otp"} , "Please Enter otp")
-        )
+    if (!mobile) {
+        return res.status(400).json(new ApiResponse(400, null, "Mobile number not found"));
     }
 
-    const CheckOtp = await verifyOTP.findOne({
-        veryficationType:'delete',
-        veryficationFeild:mobile,
+    if (!otp) {
+        return res.status(400).json(new ApiResponse(400, null, "OTP required"));
+    }
+
+    const CheckOtp = await OtpVfy.findOne({
+        veryficationType: 'delete',
+        veryficationFeild: mobile,
         otp
-    })
+    });
 
-    if(!CheckOtp)
-    {
-        return res.status(400)
-        .json(
-            new ApiResponse(400 , {success:false , data:"Pleaes Enter valid otp"},"Pleaes Enter valid otp")
-        )
+    if (!CheckOtp) {
+        return res.status(400).json(new ApiResponse(400, null, "Invalid OTP"));
     }
 
-    const link =`something.com`;
-
-    return res.status(200)
-    .json(
-        new ApiResponse(200 , {success:true , data:`Your link is ${link}`} , `your link is ${link}`)
-    )
-
-
-    
-
-})
-
-
-const deleteAccount =  AsnycHandler(async(req,res)=>{
-    
     const userId = req.user._id;
     await User.deleteOne({ _id: userId });
-    return res
-    .json(new ApiResponse(200,{success:true , data:"Account Deleted SuccessFully"},"Account Deleted SuccessFully"))
+    
+    // Clear accessToken cookie
+    res.clearCookie("accessToken", options);
 
-})
+    return res.status(200).json(new ApiResponse(200, null, "Account deleted successfully"));
+});
+
+
+
 
 // Update the export at the end
 export default {
