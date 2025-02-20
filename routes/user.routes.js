@@ -5,6 +5,8 @@ import AuthController from '../controllers/auth.controller.js';
 import UserController from '../controllers/user.controller.js';
 import { auth } from '../middlewares/auth.js';
 import multer from 'multer';
+import {UserVerify} from "../middlewares/Uservrfy.js"
+
 
 const storage = multer.memoryStorage({
 	destination(req, file, callback) {
@@ -21,8 +23,9 @@ router.route('/verify').post(AuthController.verifyOTP);
 router.route('/resend').post(AuthController.resendOTP);
 router.route('/socialLogin').post(AuthController.socialLogin);
 router.route('/disableaccount').post(AuthController.disableAccount);
-router.route('/deleteaccountlink').post(AuthController.deleteAccountLink);
-router.route('/deteleaccount').post(AuthController.deleteAccount);
+router.route('/deleteaccountotpsend').post(UserVerify , AuthController.deleteAccountOtpsend);
+router.route('/verfydeleteaccountlink').post(UserVerify , AuthController.vrfyOtpForDelet)
+router.route('/deteleaccount').post( UserVerify,AuthController.deleteAccount);
 router.route('/presignedurl').post(UserController.getPreSignedUrl);
 
 router

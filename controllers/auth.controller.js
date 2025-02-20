@@ -144,33 +144,98 @@ const disableAccount = AsnycHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, { reactivationLink: "http://example.com/reactivate" }, "Account disabled successfully"));
 });
 
-const deleteAccountLink = AsnycHandler(async (req, res) => {
-    const { password } = req.body;
-    const userId = req.user.id;
+const deleteAccountOtpsend = AsnycHandler(async (req, res) => {
+    const mobile = req.user.mobile
 
-    if (!password) {
-        return res.status(400).json(new ApiResponse(400, null, "Password is required"));
+   
+    const otp = generateOTP();
+    const otpsender = await sendSMS(`your otp is ${otp}` , mobile);
+
+    if(!otpsender)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false , data:"something error while sending otp"} ,"something error while sending otp" )
+        )
     }
 
-    const user = await User.findById(userId).select("+password");
-    if (!user) {
-        return res.status(404).json(new ApiResponse(404, null, "User not found"));
-    }
+    const setDataForOtp = await OtpVfy.create({
+        veryficationType:'delete',
+        veryficationFeild:mobile,
+        otp
+    })
 
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-        return res.status(401).json(new ApiResponse(401, null, "Invalid password"));
+    if(!setDataForOtp)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false , data:"Something error in saving otp"},"Something error in saving otp")
+        )
     }
-
+     
+    
     // await User.deleteOne({ _id: userId });
-    const link  = 'www.google.com'
-    return res.status(200).json(new ApiResponse(200, {success:true ,data:`To delete the Account click this link ${link}` }, `To delete the Account click this link ${link}`));
+    // const link  = 'www.google.com'
+    // return res.status(200).json(new ApiResponse(200, {success:true ,data:`To delete the Account click this link ${link}` }, `To delete the Account click this link ${link}`));
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , {success:true ,data:"Otp is send"},"otp is send")
+    )
 });
 
+const vrfyOtpForDelet = AsnycHandler(async(req,res)=>{
+    const {otp} = req.body;
+    const mobile = req.user.mobile
+
+    if(!mobile)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false , data:"mobile number is not found"} , "mobile number is not found")
+
+        )
+    }
+    if(!otp)
+    {
+        return res.status(200)
+        .json(
+            new ApiResponse(200 , {success:true , data:"please Enter otp"} , "Please Enter otp")
+        )
+    }
+
+    const CheckOtp = await verifyOTP.findOne({
+        veryficationType:'delete',
+        veryficationFeild:mobile,
+        otp
+    })
+
+    if(!CheckOtp)
+    {
+        return res.status(400)
+        .json(
+            new ApiResponse(400 , {success:false , data:"Pleaes Enter valid otp"},"Pleaes Enter valid otp")
+        )
+    }
+
+    const link =`something.com`;
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200 , {success:true , data:`Your link is ${link}`} , `your link is ${link}`)
+    )
+
+
+    
+
+})
+
+
 const deleteAccount =  AsnycHandler(async(req,res)=>{
-    const userId = req.user.id;
+    
+    const userId = req.user._id;
     await User.deleteOne({ _id: userId });
-    return res.status(200,{success:true , data:"Account Deleted SuccessFully"},"Account Deleted SuccessFully")
+    return res
+    .json(new ApiResponse(200,{success:true , data:"Account Deleted SuccessFully"},"Account Deleted SuccessFully"))
 
 })
 
@@ -181,7 +246,8 @@ export default {
     resendOTP,
     socialLogin,
     disableAccount,
-    deleteAccountLink,
+    deleteAccountOtpsend,
+    vrfyOtpForDelet,
     deleteAccount
 };
 
