@@ -25,7 +25,6 @@ router.route('/socialLogin').post(AuthController.socialLogin);
 router.route('/disableaccount').post(AuthController.disableAccount);
 router.route('/deleteaccountotpsend').post(UserVerify , AuthController.deleteAccountOtpsend);
 router.route('/verfydeleteaccountlink').post(UserVerify , AuthController.vrfyOtpForDelet)
-router.route('/deteleaccount').post( UserVerify,AuthController.deleteAccount);
 router.route('/presignedurl').post(UserController.getPreSignedUrl);
 
 router

@@ -233,8 +233,7 @@ export default {
     socialLogin,
     disableAccount,
     deleteAccountOtpsend,
-    vrfyOtpForDelet,
-    deleteAccount
+    vrfyOtpForDelet
 };
 
 
